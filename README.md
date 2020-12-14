@@ -1,6 +1,17 @@
 # Open Balena Dashboard (open-balena-dashboard)
 
-Dashboard for Open Balena
+Dashboard for Open Balena.
+
+Check it out here
+
+https://razikus.github.io/open-balena-dashboard/#/
+
+
+# Issues and enchancements
+
+Feel free to add the features, and request one.
+
+# Developing
 
 ## Install the dependencies
 ```bash
@@ -22,5 +33,3 @@ npm run lint
 quasar build
 ```
 
-### Customize the configuration
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
