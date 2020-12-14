@@ -11,6 +11,12 @@ https://razikus.github.io/open-balena-dashboard/#/
 
 Feel free to add the features, and request one.
 
+# Screenshots
+![Login](https://aws1.discourse-cdn.com/balena/original/2X/9/95051fdab74566f398652da6292dabf87dc1a6d5.png)
+![Apps](https://aws1.discourse-cdn.com/balena/original/2X/2/2b37485cedb68f2b57fe93e3eaca4757d1e58522.png)
+![Device](https://aws1.discourse-cdn.com/balena/original/2X/8/82e827d211ca5f14437075d82ae650dc31610a38.png)
+![Logs](https://aws1.discourse-cdn.com/balena/original/2X/1/1e08b62b161374b85f418e1f314b7243bf3617a0.png)
+
 # Developing
 
 ## Install the dependencies
