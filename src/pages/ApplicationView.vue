@@ -144,12 +144,6 @@ export default {
     this.loadApplicationDetails()
   },
   methods: {
-    getCols(props) {
-      return props.cols
-    },
-    leo(what) {
-      console.log(what)
-    },
     async saveNote(what) {
       this.loading = true
       await this.$store.state.main.sdk.models.device.note(what.row.uuid, what.row.note)
