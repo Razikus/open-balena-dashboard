@@ -6,3 +6,7 @@ export function setToken (state, token) {
 export function setSDK(state, sdk) {
     state.sdk = sdk
 }
+
+export function selectApplication(state, app) {
+    state.selectedApplication = app
+}

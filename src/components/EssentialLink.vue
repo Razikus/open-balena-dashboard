@@ -11,7 +11,7 @@
     </q-item-section>
 
     <q-item-section>
-      <q-item-label>{{ title }}</q-item-label>
+      <q-item-label>{{ $t(title) }}</q-item-label>
       <q-item-label caption>
         {{ $t(caption) }}
       </q-item-label>
@@ -24,7 +24,11 @@ export default {
   name: 'EssentialLink',
   methods: {
     openRoute() {
-      this.$router.push({ name: this.link })
+      if (this.param) {
+        this.$router.push({ name: this.link, params: this.param() })
+      } else {
+        this.$router.push({ name: this.link })
+      }
     }
 
   },
@@ -43,10 +47,13 @@ export default {
       type: String,
       default: '#'
     },
-
     icon: {
       type: String,
       default: ''
+    },
+    param: {
+      type: Function,
+      default: null
     }
   }
 }

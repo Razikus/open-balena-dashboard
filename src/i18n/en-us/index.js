@@ -8,6 +8,7 @@ export default {
   links: "Essential Links",
   logs: "Show logs",
   name: "Name",
+  value: "Value",
   online: "Online/VPN Connected",
   ip: "IP Address",
   note: "Note",
@@ -20,5 +21,17 @@ export default {
   restart: "Restart",
   nonote: "No notes",
   refresh: "Refresh",
-  editname: "Edit name"
+  editname: "Edit name",
+  selectedApplication: "Selected application",
+  Devices: "Devices",
+  homecaption: "Application selector",
+  Home: "Home",
+  devicescaption: "Devices status",
+  Env: "Environment",
+  envcaption: "Environment settings",
+  uuid: "UUID",
+  last_connectivity_event: "Last connectivity event",
+  actions: "Actions",
+  EnvVars: "Application Environment Variables",
+  ConfigVars: "Config Vars"
 }

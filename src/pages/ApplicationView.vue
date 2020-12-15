@@ -1,6 +1,5 @@
 <template>
   <q-page padding>
-
     <q-dialog v-model="dialog">
       <q-card class="big">
         <q-card-section class="row items-center q-pb-none">
@@ -22,6 +21,7 @@
       :columns="columns"
       row-key="device_name"
       :selected.sync="selected"
+      :pagination.sync="pagination"
     >
 
       <template v-slot:item="props">
@@ -84,6 +84,7 @@
 <script>
 
 import Dot from "../components/Dot"
+
 export default {
   components: { Dot },
   data() {
@@ -94,7 +95,11 @@ export default {
       history: this.$t("notloaded"),
       dialog: false,
       currLogs: null,
-      specials: ["is_online"], 
+      appEnvVars: [],
+      appConfigVars: [],
+      pagination: {
+        rowsPerPage: 20
+      },
       columns: [
         {
           name: 'device_name',
@@ -135,13 +140,29 @@ export default {
           field: row => row.overall_status + " " + (row.overall_progress == null ? "" : row.overall_progress),
           format: val => `${val}`,
           sortable: true
+        },
+        {
+          name: 'uuid',
+          label: this.$t("uuid"),
+          align: 'left',
+          field: row => row.uuid,
+          format: val => `${val}`,
+          sortable: true
+        },
+        {
+          name: 'last_connectivity_event',
+          label: this.$t("last_connectivity_event"),
+          align: 'left',
+          field: row => row.last_connectivity_event,
+          format: val => `${val}`,
+          sortable: true
         }
-
       ]
     }
   },
   mounted() {
     this.loadApplicationDetails()
+    this.$store.commit("main/selectApplication", this.$route.params.id)
   },
   methods: {
     async saveNote(what) {

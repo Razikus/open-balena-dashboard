@@ -35,6 +35,21 @@
           :key="link.title"
           v-bind="link"
         />
+        <q-separator/>
+      </q-list>
+      <q-list v-if="$store.state.main.selectedApplication"> 
+        <q-item-label
+          header
+          class="text-grey-8"
+        >
+          {{ $t('selectedApplication') }} {{ $store.state.main.selectedApplication }}
+        </q-item-label>
+        <EssentialLink 
+          v-for="link in appLinks"
+          :key="link.title"
+          v-bind="link"
+        />
+        <q-separator/>
       </q-list>
     </q-drawer>
 
@@ -50,7 +65,7 @@ import EssentialLink from 'components/EssentialLink.vue'
 const linksData = [
   {
     title: 'Home',
-    caption: 'home',
+    caption: 'homecaption',
     icon: 'home',
     link: 'home'
   }
@@ -62,7 +77,27 @@ export default {
   data () {
     return {
       leftDrawerOpen: false,
-      essentialLinks: linksData
+      essentialLinks: linksData,
+      appLinks: [
+        {
+          title: 'Devices',
+          caption: 'devicescaption',
+          icon: 'cloud',
+          link: 'application',
+          param: () => {
+            return { id: this.$store.state.main.selectedApplication }
+          }
+        },
+        {
+          title: 'Env',
+          caption: 'envcaption',
+          icon: 'settings',
+          link: 'applicationEnvs',
+          param: () => {
+            return { id: this.$store.state.main.selectedApplication }
+          }
+        }
+      ]
     }
   }
 }

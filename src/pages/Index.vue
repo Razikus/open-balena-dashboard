@@ -22,6 +22,7 @@ export default {
   },
   mounted() {
     this.loadApplications()
+    // this.$store.commit("main/selectApplication", undefined)    
   },
   methods: {
     async loadApplications() {
