@@ -1,0 +1,10 @@
+ARG BALENA_MACHINE_NAME="%%BALENA_MACHINE_NAME%%"
+FROM balenalib/${BALENA_MACHINE_NAME}-node:10 as builder
+WORKDIR /app
+COPY . /app
+RUN npm install -g @quasar/cli && npm install && quasar build
+
+FROM balenalib/${BALENA_MACHINE_NAME}-alpine:3.12 as http
+RUN apk add apache2 && rm -rf /var/www/localhost/htdocs
+COPY --from=builder /app/dist/spa/ /var/www/localhost/htdocs
+ENTRYPOINT ["httpd", "-D", "FOREGROUND"]

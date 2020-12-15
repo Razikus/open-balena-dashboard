@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.quasar/
+Dockerfile.template
+.dockerignore
