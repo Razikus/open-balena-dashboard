@@ -15,5 +15,10 @@ export default {
   notloaded: "Not loaded",
   link: "Open Balena link",
   password: "Password",
-  email: "E-mail"
+  email: "E-mail",
+  reboot: "Reboot",
+  restart: "Restart",
+  nonote: "No notes",
+  refresh: "Refresh",
+  editname: "Edit name"
 }
