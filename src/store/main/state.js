@@ -3,7 +3,7 @@ export default function () {
     loggedIn: false,
     token: "",
     sdk: undefined,
-    selectedApplication: undefined
-    //
+    selectedApplication: undefined,
+    tunnelerUrl: undefined
   }
 }

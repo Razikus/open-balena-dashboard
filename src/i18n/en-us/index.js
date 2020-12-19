@@ -33,5 +33,9 @@ export default {
   last_connectivity_event: "Last connectivity event",
   actions: "Actions",
   EnvVars: "Application Environment Variables",
-  ConfigVars: "Config Vars"
+  ConfigVars: "Config Vars",
+  tunneler: "Tunneler URL",
+  tunnelerHint: "Tunneler service (empty to not use)",
+  exposed80: "Expose port 80",
+  exposedssh: "Exposed ssh"
 }

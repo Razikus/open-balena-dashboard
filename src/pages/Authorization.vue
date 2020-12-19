@@ -8,6 +8,7 @@
               <q-input square filled clearable v-model="email" type="email" :label="$t('email')" />
               <q-input square filled clearable v-model="password" type="password" :label="$t('password')" />
               <q-input square filled clearable v-model="link" type="text" :label="$t('link')" />
+              <q-input square filled clearable v-model="tunneler" type="text" :hint="$t('tunnelerHint')" :label="$t('tunneler')" />
             </q-form>
           </q-card-section>
           <q-card-actions class="q-px-md">
@@ -28,12 +29,16 @@ export default {
     return {
       email: "",
       password: "",
-      link: ""
+      link: "",
+      tunneler: ""
     }
   },
   mounted() {
     if (window.localStorage && window.localStorage.lastOpenBalenaUrl) {
       this.link = window.localStorage.lastOpenBalenaUrl
+    }
+    if (window.localStorage && window.localStorage.lastTunnelerUrl) {
+      this.tunneler = window.localStorage.lastTunnelerUrl
     }
   },
   methods: {
@@ -45,10 +50,12 @@ export default {
       await balena.auth.loginWithToken(token)
       this.$store.commit("main/setToken", token)
       this.$store.commit("main/setSDK", balena)
+      this.$store.commit("main/setTunnelerUrl", this.tunneler)
       this.$router.push("home")
 
       if (window.localStorage) {
         window.localStorage.lastOpenBalenaUrl = this.link
+        window.localStorage.lastTunnelerUrl = this.tunneler
       }
     }
   }
