@@ -6,6 +6,8 @@ Check it out here
 
 https://razikus.github.io/open-balena-dashboard/#/
 
+
+Click on screen to check the video:
 [![Check the video](https://img.youtube.com/vi/7zWNzNoJsTE/0.jpg)](https://www.youtube.com/watch?v=7zWNzNoJsTE)
 
 
