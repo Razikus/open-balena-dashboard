@@ -6,17 +6,30 @@ Check it out here
 
 https://razikus.github.io/open-balena-dashboard/#/
 
+[![Check the video](https://img.youtube.com/vi/7zWNzNoJsTE/0.jpg)](https://www.youtube.com/watch?v=7zWNzNoJsTE)
+
+
+# Features
+* List applications
+* List devices in applications
+* Check status of devices
+* Check logs of device
+* Reboot device
+* Restart application on device
+* Expose port 80 of the device on dynamic DNS http://xip.io  (check https://github.com/Razikus/open-balena-tunneler)
+* Expose ssh of the device on dynamic DNS http://xip.io with webssh client (check https://github.com/Razikus/open-balena-tunneler)
+* Change and check environment variables of applications
+
+# Features plan list
+* Change device environment variable
+* Add applications
+* Change log viewer to xterm
 
 # Issues and enchancements
 
 Feel free to add the features, and request one.
 
-# Screenshots
-![Login](https://aws1.discourse-cdn.com/balena/original/2X/9/95051fdab74566f398652da6292dabf87dc1a6d5.png)
-![Apps](https://aws1.discourse-cdn.com/balena/original/2X/2/2b37485cedb68f2b57fe93e3eaca4757d1e58522.png)
-![Device](https://i.imgur.com/4sjBU6h.png)
-![Device](https://i.imgur.com/fzTkdcY.png)
-![Logs](https://aws1.discourse-cdn.com/balena/original/2X/1/1e08b62b161374b85f418e1f314b7243bf3617a0.png)
+
 
 # Developing
 
