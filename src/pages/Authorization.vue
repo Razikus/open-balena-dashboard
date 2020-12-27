@@ -9,6 +9,7 @@
               <q-input square filled clearable v-model="password" type="password" :label="$t('password')" />
               <q-input square filled clearable v-model="link" type="text" :label="$t('link')" />
               <q-input square filled clearable v-model="tunneler" type="text" :hint="$t('tunnelerHint')" :label="$t('tunneler')" />
+              <q-checkbox v-model="rememberMe" :label="$t('rememberMe')" />
             </q-form>
           </q-card-section>
           <q-card-actions class="q-px-md">
@@ -30,7 +31,8 @@ export default {
       email: "",
       password: "",
       link: "",
-      tunneler: ""
+      tunneler: "",
+      rememberMe: false
     }
   },
   mounted() {
@@ -40,12 +42,36 @@ export default {
     if (window.localStorage && window.localStorage.lastTunnelerUrl) {
       this.tunneler = window.localStorage.lastTunnelerUrl
     }
+    if (window.localStorage && window.localStorage.rememberMe) {
+      this.rememberMe = (window.localStorage.rememberMe === "true")
+    }
   },
   methods: {
     async tryToLogin() {
       const balena = getSdk({
           apiUrl: this.link
       })
+      balena.interceptors.push({
+          responseError: (error) => {
+              this.$q.notify({
+                color: "negative",
+                message: error.toString()
+              })
+              throw error
+          }
+        }
+      )
+      balena.interceptors.push({
+          requestError: (error) => {
+              this.$q.notify({
+                color: "negative",
+                message: error.toString()
+              })
+              throw error
+          }
+        }
+      )
+      
       const token = await balena.auth.authenticate({ email: this.email, password: this.password })
       await balena.auth.loginWithToken(token)
       this.$store.commit("main/setToken", token)
@@ -55,7 +81,12 @@ export default {
 
       if (window.localStorage) {
         window.localStorage.lastOpenBalenaUrl = this.link
-        window.localStorage.lastTunnelerUrl = this.tunneler
+        if (this.tunneler) {
+          window.localStorage.lastTunnelerUrl = this.tunneler
+        } else {
+          delete window.localStorage.lastTunnelerUrl
+        }
+        window.localStorage.rememberMe = this.rememberMe
       }
     }
   }

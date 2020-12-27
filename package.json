@@ -1,6 +1,6 @@
 {
   "name": "open-balena-dashboard",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Dashboard for Open Balena",
   "productName": "Open Balena Dashboard",
   "author": "Adam Raźniewski <adam@razniewski.eu>",

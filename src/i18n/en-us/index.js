@@ -37,5 +37,6 @@ export default {
   tunneler: "Tunneler URL",
   tunnelerHint: "Tunneler service (empty to not use)",
   exposed80: "Expose port 80",
-  exposedssh: "Exposed ssh"
+  exposedssh: "Exposed ssh",
+  rememberMe: "Remember me"
 }

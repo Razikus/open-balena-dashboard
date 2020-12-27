@@ -1,0 +1,27 @@
+{
+  "name": "eu.razniewski.openbalena.dashboard",
+  "displayName": "Open Balena Dashboard",
+  "version": "1.0.0",
+  "description": "Open Balena Dashboard",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "Adam Raźniewski",
+  "license": "MIT",
+  "devDependencies": {
+    "cordova-android": "^9.0.0",
+    "cordova-plugin-whitelist": "^1.3.4"
+  },
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-whitelist": {}
+    },
+    "platforms": [
+      "android"
+    ]
+  }
+}
