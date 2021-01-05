@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.9.12",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "balena-sdk": "^15.20.0",
     "core-js": "^3.6.5",
     "quasar": "^1.0.0",
