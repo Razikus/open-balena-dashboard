@@ -195,6 +195,14 @@ export default {
           field: (row) => row.last_connectivity_event,
           format: (val) => `${val}`,
           sortable: true
+        },
+        {
+          name: "created_at",
+          label: this.$t("created_at"),
+          align: "left",
+          field: (row) => row.created_at,
+          format: (val) => `${val}`,
+          sortable: true
         }
       ]
     }
