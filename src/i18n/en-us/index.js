@@ -39,5 +39,8 @@ export default {
   exposed80: "Expose port 80",
   exposedssh: "Exposed ssh",
   rememberMe: "Remember me",
-  created_at: "Created at"
+  created_at: "Created at",
+  exposedSSL: "Exposed SSL",
+  letsEncryptSuffix: "SSL suffix for auto domain exposer",
+  letsEncryptSuffixHint: "Example '.s1.blabla.com' - will expose DEVICEUUID.s1.blabla.com as SSL"
 }

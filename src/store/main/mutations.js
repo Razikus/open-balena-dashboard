@@ -14,3 +14,7 @@ export function selectApplication(state, app) {
 export function setTunnelerUrl(state, url) {
     state.tunnelerUrl = url
 }
+
+export function setSSLSuffix(state, SSLSuffix) {
+    state.SSLSuffix = SSLSuffix
+}

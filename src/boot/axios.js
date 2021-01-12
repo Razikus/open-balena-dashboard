@@ -38,6 +38,21 @@ export default boot(async ({ app, router, store, Vue }) => {
             const res = await axios.post(store.state.main.tunnelerUrl + "/requestConnection", data, { headers: { Authorization: "Bearer " + store.state.main.token } })
             return res.data
         },
+        async openSSLDomainFor(uuid, domainName, remotePort, appId) {
+            const data = {
+                deviceUUID: uuid,
+                remotePort: remotePort,
+                forwarderType: "SSLTRAEFIK",
+                additionalSettings: {
+                    domainName: domainName
+                },
+                additionalLabels: {
+                    deviceAppId: appId
+                }
+            }
+            const res = await axios.post(store.state.main.tunnelerUrl + "/requestConnection", data, { headers: { Authorization: "Bearer " + store.state.main.token } })
+            return res.data
+        },
         async openSSHTraefik(uuid, domainName, remotePort, useXip, appId) {
             const data = {
                 deviceUUID: uuid,

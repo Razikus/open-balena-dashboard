@@ -102,6 +102,19 @@
               />
               <q-btn @click="openDomain(props.row.exposedDetails)" :disable="deviceLoadingState[props.row.uuid]" v-if="props.row.exposed" style="margin-left: 10px;" color="secondary">{{ $t("open") }}</q-btn>
             </q-card-section>
+            <q-card-section v-if="$store.state.main.tunnelerUrl && $store.state.main.SSLSuffix">
+              <q-toggle
+                v-model="props.row.exposedSSL"
+                color="green"
+                :label="$t('exposedSSL')"
+                @input="exposeSSL(props)"
+                checked-icon="check"
+                unchecked-icon="clear"
+                :disable="deviceLoadingState[props.row.uuid]"
+                style="width: 200px;"
+              />
+              <q-btn @click="openDomain(props.row.exposedDetails)" :disable="deviceLoadingState[props.row.uuid]" v-if="props.row.exposedSSL" style="margin-left: 10px;" color="secondary">{{ $t("open") }}</q-btn>
+            </q-card-section>
             <q-separator />
             <q-card-section>
               <q-btn @click="refresh(props)">{{ $t("refresh") }}</q-btn>
@@ -253,16 +266,22 @@ export default {
           if (device.exposed === undefined) {
             device.exposed = false
           }
+          if (device.exposedSSL === undefined) {
+            device.exposedSSL = false
+          }
           for (let index = 0; index < tunnelerInformation.length; index++) {
             const element = tunnelerInformation[index]
             if (device.uuid === element.deviceUUID) {
               if (element.forwarderType === "SSHTRAEFIK") {
                 device.sshExposed = true
                 device.sshDetails = element
-              }
-              if (element.forwarderType === "TRAEFIK") {
+              } else if (element.forwarderType === "TRAEFIK") {
                 device.exposed = true
                 device.exposedDetails = element
+              } else if (element.forwarderType === "SSLTRAEFIK") {
+                device.exposedSSL = true
+                device.exposedDetails = element
+                device.exposedDetails.ssl = true
               }
               if (device.tunneler) {
                 device.tunneler.push(element)
@@ -296,17 +315,24 @@ export default {
           what.row.uuid
         )
         res.tunneler = tunnelerInformation
+        res.exposedSSL = false
         res.exposed = false
         res.sshExposed = false
         for (let index = 0; index < res.tunneler.length; index++) {
           const element = res.tunneler[index]
+          console.log(element)
           if (element.forwarderType === "SSHTRAEFIK") {
             res.sshExposed = true
             res.sshDetails = element
-          }
-          if (element.forwarderType === "TRAEFIK") {
+            res.exposedDetails.ssl = false
+          } else if (element.forwarderType === "TRAEFIK") {
             res.exposed = true
             res.exposedDetails = element
+            res.exposedDetails.ssl = false
+          } else if (element.forwarderType === "SSLTRAEFIK") {
+            res.exposedSSL = true
+            res.exposedDetails = element
+            res.exposedDetails.ssl = true
           }
         }
       }
@@ -343,6 +369,34 @@ export default {
           this.history
       })
       this.currLogs = logs
+    },
+    async exposeSSL(props) {
+      this.loading = true
+      this.deviceLoadingState[props.row.uuid] = true
+      const uuid = props.row.uuid
+      if (!props.row.exposedSSL) {
+        await this.$tunnelerClient.deleteConnections(
+          uuid,
+          undefined,
+          undefined,
+          "SSLTRAEFIK"
+        )
+      } else {
+        const domain = uuid.substr(0, 10) + ".s1.skryba.online"
+        await this.$tunnelerClient.openSSLDomainFor(
+          uuid,
+          domain,
+          80,
+          this.$route.params.id
+        )
+        props.row.exposedDetails = {
+          domainName: "https://" + domain
+        }
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        window.open(props.row.exposedDetails.domainName, "_blank")
+      }
+      this.deviceLoadingState[props.row.uuid] = false
+      this.loading = false
     },
     async expose(props) {
       this.loading = true
