@@ -1,6 +1,6 @@
 <template>
   <q-page class="window-height window-width row justify-center items-center">
-        <div class="col-lg-4 col-md-4 col-10">
+        <div class="col-lg-4 col-md-6 col-10">
         <q-card square bordered class="q-pa-lg col-12 shadow-1">
           <q-card-section>
             <q-form class="q-gutter-md">
