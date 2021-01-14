@@ -42,5 +42,6 @@ export default {
   created_at: "Created at",
   exposedSSL: "Exposed SSL",
   letsEncryptSuffix: "SSL suffix for auto domain exposer",
-  letsEncryptSuffixHint: "Example '.s1.blabla.com' - will expose DEVICEUUID.s1.blabla.com as SSL"
+  letsEncryptSuffixHint: "Example '.s1.blabla.com' - will expose DEVICEUUID.s1.blabla.com as SSL",
+  mac_address: "Mac addresses"
 }
