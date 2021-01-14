@@ -175,6 +175,14 @@ export default {
           sortable: true
         },
         {
+          name: "mac_address",
+          label: this.$t("mac_address"),
+          align: "left",
+          field: (row) => row.mac_address,
+          format: (val) => `${val}`,
+          sortable: true
+        },
+        {
           name: "note",
           label: this.$t("note"),
           align: "left",
@@ -253,6 +261,7 @@ export default {
       const devices = await this.$store.state.main.sdk.models.device.getAllByApplication(
         this.$route.params.id
       )
+      console.log(devices)
       if (this.$store.state.main.tunnelerUrl) {
         const tunnelerInformation = await this.$tunnelerClient.getConnectionsForApp(
           this.$route.params.id
