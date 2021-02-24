@@ -43,5 +43,8 @@ export default {
   exposedSSL: "Exposed SSL",
   letsEncryptSuffix: "SSL suffix for auto domain exposer",
   letsEncryptSuffixHint: "Example '.s1.blabla.com' - will expose DEVICEUUID.s1.blabla.com as SSL",
-  mac_address: "Mac addresses"
+  mac_address: "Mac addresses",
+  editDeviceEnv: "Edit envs",
+  DeviceEnvVars: "Device env vars (higher priority than application envs)",
+  delete: "Delete"
 }

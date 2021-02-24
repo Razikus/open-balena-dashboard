@@ -74,6 +74,9 @@
               <q-btn @click="restart(props)" v-if="props.row.is_online">{{
                 $t("restart")
               }}</q-btn>
+              <q-btn :to="'/deviceenvs/' + $route.params.id + '/' +  props.row.uuid">{{
+                $t("editDeviceEnv")
+              }}</q-btn>
             </q-card-section>
             <q-separator />
             <q-card-section v-if="$store.state.main.tunnelerUrl">

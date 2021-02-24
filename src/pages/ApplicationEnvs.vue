@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <EnvEditor v-on:reload="loadEnvs" :currentEnvs="envVars" :appConfigVars="configVars" :parentLoading="loading" envType="application"></EnvEditor>
+    <EnvEditor v-on:reload="loadEnvs" :currentEnvs="envVars" :appConfigVars="configVars" :parentLoading="loading"></EnvEditor>
   </q-page>
 </template>
 
