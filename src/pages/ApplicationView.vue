@@ -2,6 +2,7 @@
   <q-page padding>
     <q-dialog v-model="dialog">
       <q-card class="big">
+
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">Logs</div>
           <q-space />
