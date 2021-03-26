@@ -1,5 +1,5 @@
 <template>
-  <div @click="$refs.cmd.focus();">
+  <div v-on:keydown.ctrl.67.capture.prevent.stop="cmd_enter('^C')" @click="$refs.cmd.focus();">
     <div ref="terminal" id="container">
       <div v-if="banner" id="banner">
         <p>
@@ -83,7 +83,7 @@ export default {
   },
   computed: {
     allcommands() {
-      var tab = ["help", "clear"]
+      var tab = ["help", "clear", "list", "logs"]
       if (this.commands) {
         this.commands.forEach(a => {
           tab.push(a.name)
@@ -164,7 +164,13 @@ export default {
         this.value = ""
       } else if (cmd === "help") {
         this.output(
-          '<div class="ls-files">' + this.allcommands.join("<br>") + "</div>"
+          '<div class="ls-files">' + this.allcommands.join("<br>") + "</div>" +
+          `<br> Use <b>list</b> command with -a flag to get full info about services at device` +
+          `<br> Use <b>logs</b> command to see all logs from device` +
+          `<br>` +
+            `<br> <b>-s</b> service_name: get logs from specified service` +
+          `<br> <b>--tail</b> get specified amount of messages:` +
+          `<br> Use <b>CTRL + C</b> for focus on input, and <b>CTRL + Z</b> for exit from terminal`
         )
       } else {
         if (this.commands) {
@@ -185,7 +191,7 @@ export default {
     output(html) {
       this.$refs.output.insertAdjacentHTML(
         "beforeEnd",
-        "<pre>" + html + "</pre>"
+        "<p>" + html + "</p>"
       )
       this.value = ""
     }
@@ -261,7 +267,7 @@ img {
   outline: none;
   background-color: transparent;
   margin: 0;
-  width: inherit;
+  width: 300px;
   font: inherit;
   border: none;
   color: inherit;
@@ -270,5 +276,8 @@ img {
 .ls-files {
   height: 45px;
   column-width: 100px;
+}
+td {
+  text-align: right;
 }
 </style>

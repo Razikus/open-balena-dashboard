@@ -11,17 +11,15 @@
           <q-td key="Name" :props="props">
             {{ props.row.name }}
           </q-td>
-
           <q-td key="Value" :props="props">
             {{ props.row.value }}
             <q-popup-edit v-model="props.row.value" @save="updateEnv(props)">
               <q-input v-model="props.row.value" dense autofocus counter />
             </q-popup-edit>
-            
             </q-td>
           <q-td key="Action" :props="props">
             <q-btn @click="deleteEnv(props)">{{$t("delete")}}</q-btn>
-            
+
           </q-td>
         </q-tr>
       </template>
@@ -59,11 +57,11 @@
             <q-popup-edit v-model="props.row.value" @save="updateConfig(props)">
               <q-input v-model="props.row.value" dense autofocus counter />
             </q-popup-edit>
-            
+
             </q-td>
           <q-td key="Action" :props="props">
             <q-btn @click="deleteConfig(props)">Delete</q-btn>
-            
+
           </q-td>
         </q-tr>
       </template>

@@ -6,7 +6,7 @@ export default {
   success: 'Action was successful',
   home: "Home",
   links: "Essential Links",
-  logs: "Show logs terminal",
+  logs: "Logs terminal",
   name: "Name",
   value: "Value",
   online: "Online/VPN Connected",

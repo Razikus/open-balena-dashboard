@@ -1,60 +1,87 @@
 <template>
-  <q-dialog full-height full-width v-model="dialog" persistent>
-    <q-card class="bg-black" >
+  <q-dialog v-on:keydown.ctrl.90.capture.prevent.stop="hideLog"  full-height full-width v-model="dialog" persistent>
+    <q-card class="bg-black">
       <q-bar>
         <q-space/>
-        <q-btn dense flat color="white" icon="close" v-close-popup>
+        <q-btn dense flat color="white" icon="close" @click="hideLog" v-close-popup>
           <q-tooltip>Close</q-tooltip>
         </q-btn>
       </q-bar>
-      <shell :commands="commands" :banner="banner" :shell_input="send_to_terminal" @shell_output="prompt"></shell>
+      <shell :banner="banner" :shell_input="send_to_terminal" @shell_output="prompt"></shell>
     </q-card>
   </q-dialog>
 </template>
 <script>
 
 import shell from './terminal/v-shell'
+import TerminalCommandsUtil from "components/terminal/utils/TerminalCommandsUtil"
 
 export default {
   name: 'LogTerminal',
   components: { shell },
   props: {
     dialog: {},
-    maximizedToggle: {}
+    maximizedToggle: {},
+    hideLog: {},
+    uuid: {}
+  },
+  watch: {
+    uuid: function (newVal, oldVal) {
+      this.terminalUtil = new TerminalCommandsUtil(newVal, this.$store.state.main.sdk)
+    }
+  },
+  mounted() {
+    this.terminalUtil = new TerminalCommandsUtil(this.uuid, this.$store.state.main.sdk)
+    this.getServicesForDevice(this.uuid)
   },
   methods: {
-    prompt(val) {
-      console.log(val)
-      if (val === "ifconfig") {
-        // Do somthing ... then send the data to shell
-        this.send_to_terminal = "data"
+    detach() {
+      this.send_to_terminal = "^C"
+      setTimeout(() => {
+        this.send_to_terminal = ""
+      }, 300)
+    },
+    prompt: function (val) {
+      if (this.terminalUtil.commandExists(val)) {
+        this.send_to_terminal = ""
+        if (val.includes("-f") && val.includes("logs")) {
+          this.subscribeToLogs(this.uuid)
+          return
+        }
+        this.terminalUtil.processCommand(val, this.uuid, this.send_to_terminal).then(res => {
+          this.send_to_terminal = res
+        })
       } else {
         this.send_to_terminal = ""
         // Else send error message in output of shell
         this.send_to_terminal = `'${val}' is not recognized as an internal command or external`
       }
+    },
+    subscribeToLogs(uuid) {
+      this.terminalUtil.processCommand("logs --tail 100", this.uuid, this.send_to_terminal).then(res => {
+        this.send_to_terminal = res
+      })
+      this.$store.state.main.sdk.logs.subscribe(uuid).then(logs => {
+        logs.on("line", (message) => {
+          console.log(message)
+          this.terminalUtil.formatMessageAsPromise(message).then(res => {
+            this.send_to_terminal += `<br>${res}`
+          })
+        })
+      })
     }
   },
   data() {
     return {
-      commands: [{
-        name: "info",
-        get() {
-          return `<p>This is terminal for working with logs from devices</p>`
-        }
-      },
-        {
-          name: "uname",
-          get() {
-            return navigator.appVersion
-          }
-        }
-      ],
+      terminalUtil: undefined,
+      services: [],
+      currLogs: '',
+      history: '',
       send_to_terminal: "",
       banner: {
         header: "",
         subHeader: "Shell for logs from devices",
-        helpHeader: 'Enter "help" for more information.',
+        helpHeader: 'Enter "help" for more information',
         emoji: {
           first: "",
           second: "",
@@ -70,10 +97,12 @@ export default {
       }
     }
   }
+
 }
 </script>
-<style>
+<style scoped>
 .big {
   min-width: 100%;
 }
+
 </style>

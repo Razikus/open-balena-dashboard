@@ -20,7 +20,7 @@
           </div>
           <div class="row text-center">
             <div class="col-6">
-              <div class="text-caption">ARCH</div>
+              <div class="text-caption text-grey">ARCH</div>
               <div class="text-caption">{{ arch }}</div>
             </div>
             <div class="col-6">
