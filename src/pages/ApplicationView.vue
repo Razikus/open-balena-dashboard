@@ -1,19 +1,6 @@
 <template>
   <q-page padding>
-    <q-dialog v-model="dialog">
-      <q-card class="big">
-
-        <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">Logs</div>
-          <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
-        </q-card-section>
-
-        <q-card-section>
-          <pre>{{ history }}</pre>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
+    <LogTerminal :dialog="dialog" :maximized-toggle="maximizedToggle"/>
     <q-table
       :loading="loading"
       grid
@@ -25,8 +12,7 @@
       :pagination.sync="pagination"
     >
       <template v-slot:item="props">
-        <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition">
-          <q-card>
+          <q-card class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition">
             <q-list dense>
               <q-item v-for="col in props.cols" :key="col.name">
                 <q-item-section>
@@ -68,7 +54,7 @@
             </q-list>
             <q-separator />
             <q-card-section>
-              <q-btn @click="showLogs(props)">{{ $t("logs") }}</q-btn>
+              <q-btn @click="showLogs(props.row.uuid)">{{ $t("logs") }}</q-btn>
               <q-btn @click="reboot(props)" v-if="props.row.is_online">{{
                 $t("reboot")
               }}</q-btn>
@@ -124,24 +110,21 @@
               <q-btn @click="refresh(props)">{{ $t("refresh") }}</q-btn>
             </q-card-section>
           </q-card>
-        </div>
       </template>
     </q-table>
   </q-page>
 </template>
-<style scoped>
-.big {
-  min-width: 100%;
-}
-</style>
 <script>
 import Dot from "../components/Dot"
+import LogTerminal from "components/LogTerminal"
+
 export default {
-  components: { Dot },
+  components: { LogTerminal, Dot },
   data() {
     return {
       devices: [],
       loading: false,
+      maximizedToggle: true,
       sshExpose: false,
       selected: null,
       history: this.$t("notloaded"),
@@ -352,13 +335,12 @@ export default {
       this.devices.splice(realIndex, 1, res)
       this.loading = false
     },
-    async showLogs(what) {
+    async showLogs(uuid) {
+      this.dialog = true
       if (this.currLogs) {
         this.currLogs.unsubscribe()
       }
-      this.history = "Loading"
-      this.dialog = true
-      const uuid = what.row.uuid
+      this.history = []
       let historyNew = ""
       const history = await this.$store.state.main.sdk.logs.history(uuid)
       for (let index = history.length - 1; index >= 0; index--) {
