@@ -1,0 +1,108 @@
+<template>
+  <q-dialog v-on:keydown.ctrl.90.capture.prevent.stop="hideLog"  full-height full-width v-model="dialog" persistent>
+    <q-card class="bg-black">
+      <q-bar>
+        <q-space/>
+        <q-btn dense flat color="white" icon="close" @click="hideLog" v-close-popup>
+          <q-tooltip>Close</q-tooltip>
+        </q-btn>
+      </q-bar>
+      <shell :banner="banner" :shell_input="send_to_terminal" @shell_output="prompt"></shell>
+    </q-card>
+  </q-dialog>
+</template>
+<script>
+
+import shell from './terminal/v-shell'
+import TerminalCommandsUtil from "components/terminal/utils/TerminalCommandsUtil"
+
+export default {
+  name: 'LogTerminal',
+  components: { shell },
+  props: {
+    dialog: {},
+    maximizedToggle: {},
+    hideLog: {},
+    uuid: {}
+  },
+  watch: {
+    uuid: function (newVal, oldVal) {
+      this.terminalUtil = new TerminalCommandsUtil(newVal, this.$store.state.main.sdk)
+    }
+  },
+  mounted() {
+    this.terminalUtil = new TerminalCommandsUtil(this.uuid, this.$store.state.main.sdk)
+    this.getServicesForDevice(this.uuid)
+  },
+  methods: {
+    detach() {
+      this.send_to_terminal = "^C"
+      setTimeout(() => {
+        this.send_to_terminal = ""
+      }, 300)
+    },
+    prompt: function (val) {
+      if (this.terminalUtil.commandExists(val)) {
+        this.send_to_terminal = ""
+        if (val.includes("-f") && val.includes("logs")) {
+          this.subscribeToLogs(this.uuid)
+          return
+        }
+        this.terminalUtil.processCommand(val, this.uuid, this.send_to_terminal).then(res => {
+          this.send_to_terminal = res
+        })
+      } else {
+        this.send_to_terminal = ""
+        // Else send error message in output of shell
+        this.send_to_terminal = `'${val}' is not recognized as an internal command or external`
+      }
+    },
+    subscribeToLogs(uuid) {
+      this.terminalUtil.processCommand("logs --tail 100", this.uuid, this.send_to_terminal).then(res => {
+        this.send_to_terminal = res
+      })
+      this.$store.state.main.sdk.logs.subscribe(uuid).then(logs => {
+        logs.on("line", (message) => {
+          console.log(message)
+          this.terminalUtil.formatMessageAsPromise(message).then(res => {
+            this.send_to_terminal += `<br>${res}`
+          })
+        })
+      })
+    }
+  },
+  data() {
+    return {
+      terminalUtil: undefined,
+      services: [],
+      currLogs: '',
+      history: '',
+      send_to_terminal: "",
+      banner: {
+        header: "",
+        subHeader: "Shell for logs from devices",
+        helpHeader: 'Enter "help" for more information',
+        emoji: {
+          first: "",
+          second: "",
+          time: 750
+        },
+        sign: "open-balena $",
+        img: {
+          align: "left",
+          link: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMjgiIGhlaWdodD0iNDIiIHZpZXdCb3g9IjAgMCAyMjggNDIiPgogICAgPGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8cGF0aCBmaWxsPSIjMDBEMkVBIiBkPSJNNTcuMjMxIDIzLjA4NmMwIDIuMTg2IDEuNjY3IDMuOCAzLjYzNSAzLjggMS45NjggMCAzLjYzNS0xLjYxNCAzLjYzNS0zLjgyOCAwLTIuMjEzLTEuNjY3LTMuODI2LTMuNjM1LTMuODI2LTEuOTY4IDAtMy42MzUgMS42MTMtMy42MzUgMy44MjZ2LjAyOHptLTQuNTM3LS4wNTVjMC0zLjY5IDIuNjUxLTguMDM1IDguMTcyLTguMDM1IDUuNTIxIDAgOC4xNzIgNC4zNDYgOC4xNzIgOC4wNjIgMCAzLjcxOC0yLjY1IDguMDYzLTguMTcyIDguMDYzLTUuNTIgMC04LjE3Mi00LjM0NS04LjE3Mi04LjA2M3YtLjAyN3pNODMuNTUgMjMuMDU5YzAtMS43NzYtMS4zMTItMy44NTQtMy44LTMuODU0LTEuMDkzIDAtMi4wNS40MzctMi43MzIgMS4xNDgtLjY1Ny42ODQtMS4wNjcgMS42NjctMS4wNjcgMi43NiAwIDEuMDY3LjQxIDIuMDIzIDEuMDk0IDIuNzA2YTMuODIgMy44MiAwIDAgMCAyLjcwNiAxLjEyYzIuMzc4IDAgMy43OTktMS45NCAzLjc5OS0zLjg1M3YtLjAyN3ptLTExLjk0NC03LjU3aDQuMjY0djEuNjY2Yy45ODQtMS4xNDcgMi40ODctMi4xODYgNC44MS0yLjE4NiA1LjM4NCAwIDcuNDA3IDQuNzI4IDcuNDA3IDguMjUzIDAgNC4zNzQtMy4wNjEgNy45NTQtNy4zOCA3Ljk1NC0yLjczMyAwLTQuMDE4LTEuMzEyLTQuNTY0LTEuODg2djYuNDI0aC00LjUzN1YxNS40ODh6TTEwMS4yMDQgMjEuMmMtLjExLS43MS0xLjAzOC0yLjQwNS0zLjM4OS0yLjQwNS0yLjM1IDAtMy4yOCAxLjY5NS0zLjM4OSAyLjQwNWg2Ljc3OHptLTYuODMzIDMuNDQ0Yy4xOTEgMS42MTIgMS43MjIgMi42NzggMy40OTkgMi42NzggMS40NDggMCAyLjIxNC0uNjI4IDIuNzYtMS40Mmg0LjY0N2MtLjczOCAxLjY5NC0xLjgwNCAzLjAwNi0zLjA4OCAzLjg4YTcuMzczIDcuMzczIDAgMCAxLTQuMzIgMS4zNjdjLTQuMzQ0IDAtOC4wMzUtMy41MjYtOC4wMzUtOC4wMzYgMC00LjIzNiAzLjMzNS04LjE0NCA3Ljk1NC04LjE0NCAyLjMyMyAwIDQuMzE4LjkwMiA1Ljc0IDIuNDA1IDEuOTEzIDIuMDUgMi40ODcgNC40ODIgMi4xMzEgNy4yN0g5NC4zNzF6TTEwOC4zMSAxNS40ODhoNC4yMzV2MS42MTNjLjUyLS43MzggMS40NzYtMi4xMzIgNC4xODItMi4xMzIgNS4xMTEgMCA1LjYzIDQuMTU0IDUuNjMgNi4yMDR2OS40ODRoLTQuNTM3di04LjI4MmMwLTEuNjY3LS4zNTUtMy4xNDMtMi4zNzctMy4xNDMtMi4yNDEgMC0yLjU5NyAxLjYxMy0yLjU5NyAzLjE3djguMjU1aC00LjUzN1YxNS40ODh6TTMzLjg1IDE1LjE3NHYxMS41ODNjMCAxLjcwNC0uOTE4IDMuMjktMi4zOTUgNC4xMzlsLTEwLjEgNS44MDdjLS4yNy4xNTUtLjU1LjI3Ny0uODM5LjM3MnY0LjYzNmMuNDktLjEyOC45Ni0uMzEyIDEuMzk2LS41NjRsMTMuMTE3LTcuNTQyYTUuOTIgNS45MiAwIDAgMCAyLjk2Mi01LjExOFYxMy40NDRjMC0uNTEyLS4wNzctMS4wMTctLjIxMy0xLjUxM2wtNC4wMTUgMi4zODJjLjA1NC4yODEuMDg3LjU2OC4wODcuODZNMi45NTUgOC4zMjNjLS41MTUuMjk3LS45OC42ODItMS4zODUgMS4xMjhsMy45ODYgMi4zNjVjLjI5LS4yOTguNjA1LS41Ny45NzQtLjc4M0wxNi41OSA1LjIzYTQuNzkgNC43OSAwIDAgMSA0Ljc2Ni0uMDAzbDEwLjEgNS44MDhjLjMwMy4xNzQuNTczLjM4OC44MjMuNjIxbDMuOTY3LTIuMzUzYy0uMzY4LS4zNzctLjc2NC0uNzE3LTEuMjE2LS45NzhMMjEuOTEzLjc4M2E1LjkyNyA1LjkyNyAwIDAgMC01Ljg5NS4wMDRMMi45NTUgOC4zMjN6TTE2LjU4OCAzNi43TDYuNTMgMzAuODk4YTQuNzg3IDQuNzg3IDAgMCAxLTIuMzktNC4xMzZWMTUuMTdjMC0uMjEuMDI3LS40MTcuMDU2LS42MjNMLjE2MyAxMi4xNTRBNS43MiA1LjcyIDAgMCAwIDAgMTMuNDM3djE1LjA1NmE1LjkxOCA1LjkxOCAwIDAgMCAyLjk1NSA1LjExNGwxMy4wNjMgNy41MzdjLjQ1NC4yNjIuOTQzLjQ1MiAxLjQ1Ni41ODJ2LTQuNjQzYTQuNTE3IDQuNTE3IDAgMCAxLS44ODYtLjM4MiIvPgogICAgICAgIDxnIGZpbGw9IiMyQTUwNkYiPgogICAgICAgICAgICA8cGF0aCBkPSJNMTMyLjIxOSAyMC4yODZjLS45OTUuODA0LTEuNDkyIDEuODMtMS40OTIgMy4wNzcgMCAxLjMyLjQ1OCAyLjQyNiAxLjM3MiAzLjMyMS45MTUuODk1IDIuMTE4IDEuMzQyIDMuNjA5IDEuMzQyIDEuNDExIDAgMi41NTQtLjQyNiAzLjQzLTEuMjc5Ljg3NC0uODUgMS4zMTEtMS45MTIgMS4zMTEtMy4xODEgMC0xLjI1LS40MzctMi4zMTUtMS4zMTItMy4xOTQtLjg3NS0uODgtMi4wMTgtMS4zMi0zLjQzLTEuMzItMS4zMzIuMDE5LTIuNDk1LjQzLTMuNDg4IDEuMjM0ek0xMjcgMTFoMy45NjZ2Ni41ODhoLjA2Yy40MzctLjU3OCAxLjAxOC0xLjAyNSAxLjc0NS0xLjM0MmE4LjYxMSA4LjYxMSAwIDAgMSAyLjI1MS0uNjM3Yy4xOTktLjAxOC4zODctLjAzMS41NjctLjA0LjE3OC0uMDEuMzU4LS4wMTQuNTM2LS4wMTQgMi40MjYgMCA0LjQxNC44MDUgNS45NjUgMi40MTMgMS41NSAxLjYwOSAyLjMyNiAzLjQ3IDIuMzI2IDUuNTg0IDAgLjMwOC0uMDIuNjI5LS4wNi45NjNhNS43MSA1LjcxIDAgMCAxLS4yMDkuOTkgOC41NDcgOC41NDcgMCAwIDEtLjcxNiAxLjg5OCA3LjMyMiA3LjMyMiAwIDAgMS0xLjEzMiAxLjYyNiA3LjEzMyA3LjEzMyAwIDAgMS0yLjcxNCAxLjg1NyA5IDkgMCAwIDEtMy4zNC42MzhjLTEuMTM0IDAtMi4xODItLjE5Ni0zLjE0Ny0uNTg0LS45NjUtLjM4OC0xLjc2NC0xLjAyNS0yLjQtMS45MTFsLS4wNi0uMDI3djIuMDMzSDEyN1YxMXpNMTU5LjY1NSAyMy40OTljMC0xLjI0Ny0uNDQzLTIuMy0xLjMyOC0zLjE2LS44ODUtLjg1OC0yLjAzMy0xLjI3OC0zLjQ0NC0xLjI2LTEuNDUyLS4wMTgtMi42NC40MTYtMy41NjQgMS4zMDItLjkyNC44ODYtMS4zODYgMS45ODgtMS4zODYgMy4zMDcgMCAxLjIzLjQ4MSAyLjI2NCAxLjQ0NiAzLjEwNC45NjQuODQgMi4xMTIgMS4yNTMgMy40NDQgMS4yMzQgMS40MzIuMDE5IDIuNTk1LS40MDcgMy40OS0xLjI3NC44OTQtLjg2OCAxLjM0Mi0xLjk0MyAxLjM0Mi0zLjIyNnYtLjAyN3ptMy43NTcgNy41MzZoLTMuNjM4di0yLjAzM2gtLjA2Yy0uNDk3LjY1LTEuMTU0IDEuMTg0LTEuOTY5IDEuNmE4LjY1NiA4LjY1NiAwIDAgMS0yLjUzNC44NGwtLjU1MS4wNTRjLS4xOS4wMTgtLjM3NC4wMjctLjU1Mi4wMjctMS4yNzMgMC0yLjQyNy0uMjIyLTMuNDYtLjY2NGE3LjU1NiA3LjU1NiAwIDAgMS0yLjYyNC0xLjgzIDcuODA1IDcuODA1IDAgMCAxLTEuNTItMi40OTQgOC4zMTIgOC4zMTIgMCAwIDEtLjUzOC0yLjk4M2MwLTEuMDQ4LjE2NC0yLjAxNC40OTItMi45LjMyOS0uODg1Ljg3LTEuNzE3IDEuNjI1LTIuNDk0LjgzNi0uODg2IDEuNzY0LTEuNTQxIDIuNzg5LTEuOTY2IDEuMDI0LS40MjQgMi4xNDEtLjYzNyAzLjM1NS0uNjM3IDEuMTMzIDAgMi4xNzcuMjIyIDMuMTMuNjY0YTYuNDQgNi40NCAwIDAgMSAyLjQxNyAxLjkzOXYtMi4xNDJoMy42Mzh2MTUuMDE5ek0xNjYuMzY0IDMxLjAzNWgzLjk2NlYxMWgtMy45NjZ6TTE4Ni4wNDYgMjEuOTI2Yy0uMzE5LS44ODYtLjg5NS0xLjU4Mi0xLjczLTIuMDg3YTUuMjQ3IDUuMjQ3IDAgMCAwLTIuNzczLS43NmgtLjI0YTUuNjk1IDUuNjk1IDAgMCAwLTIuNjgzLjg0N2MtLjgzNS41MS0xLjM5MSAxLjE3Ni0xLjY3IDJoOS4wOTZ6bS05LjAzNiAzLjJjLjI5OC44ODUuODUgMS41OSAxLjY1NSAyLjExM2E0Ljg0MiA0Ljg0MiAwIDAgMCAyLjY5OS43ODdjLjc1NSAwIDEuNDY1LS4xMTggMi4xMzEtLjM1Mi42NjYtLjIzNiAxLjE4OS0uNTUyIDEuNTY3LS45NWw0LjM4NC0uMDI3Yy0uNDk4IDEuMzU2LTEuNTA2IDIuNS0zLjAyNyAzLjQzLTEuNTIxLjkzLTMuMTU3IDEuMzk2LTQuOTA2IDEuMzk2LTIuNDA2IDAtNC40NTgtLjc2My02LjE1OC0yLjI5LTEuNy0xLjUyNy0yLjU1LTMuMzg1LTIuNTUtNS41NzIgMC0yLjIyMy44NDUtNC4xMyAyLjUzNS01LjcyIDEuNjktMS41OSAzLjc2Ny0yLjM4NiA2LjIzMi0yLjM4NiAyLjM2NiAwIDQuMzcuNzg5IDYuMDEgMi4zNjYgMS42NCAxLjU3NiAyLjQ2IDMuNDEgMi40NiA1LjUgMCAuMjM1LS4wMTUuNDY1LS4wNDUuNjktLjAzLjIyNS0uMDY1LjQ0Ni0uMTA1LjY2Mi0uMDIuMDczLS4wMzUuMTM2LS4wNDQuMTlhLjg4OC44ODggMCAwIDAtLjAxNS4xNjJIMTc3LjAxek0xOTIuNjA3IDE2LjAxNmgzLjY2OFYxNy40aC4wNmMuNDU2LS41NiAxLjA1OC0uOTk0IDEuODA0LTEuMzAyYTcuMzk1IDcuMzk1IDAgMCAxIDIuMzQtLjU0MmguNTk3Yy4wNzkgMCAuMTYuMDEuMjM5LjAyN2E2LjkyNCA2LjkyNCAwIDAgMSAyLjMxLjU3Yy43NDcuMzI1IDEuMzg4Ljc1IDEuOTI0IDEuMjczbC4yMjQuMjA0Yy4wNy4wNjMuMTM0LjE0LjE5NC4yMy42MzUuODE0IDEuMDE0IDEuNjgyIDEuMTMzIDIuNjAzLjEyLjkyMi4xOCAxLjg2Mi4xOCAyLjgydjcuNzUzaC0zLjk2N3YtNy43ODFjMC0uMjUzLS4wMS0uNTA1LS4wMy0uNzU5YTcuMjYgNy4yNiAwIDAgMC0uMjEtMS4xNTJjLS4wOTktLjM3LS4yNDgtLjcwOS0uNDQ2LTEuMDE3YTIuNzUzIDIuNzUzIDAgMCAwLTEuMDYtLjg2OCAzLjgyNyAzLjgyNyAwIDAgMC0xLjM4NS0uMzc5aC0uMzczYy0uMDcgMC0uMTQ0LjAxLS4yMjQuMDI3YTMuOTA0IDMuOTA0IDAgMCAwLTEuMzQyLjQyMSAyLjYzIDIuNjMgMCAwIDAtMS4wMTQuODhjLS4xOTguMjktLjM0OC42MjktLjQ0NyAxLjAxOC0uMS4zODgtLjE2Ljc4MS0uMTggMS4xNzktLjAyLjIzNS0uMDI5LjQ3LS4wMjkuNzA1djcuNzI2aC0zLjk2NlYxNi4wMTZ6TTIyMy40NzIgMjMuNDk5YzAtMS4yNDctLjQ0My0yLjMtMS4zMjctMy4xNi0uODg1LS44NTgtMi4wMzQtMS4yNzgtMy40NDQtMS4yNi0xLjQ1My0uMDE4LTIuNjQuNDE2LTMuNTY0IDEuMzAyLS45MjQuODg2LTEuMzg4IDEuOTg4LTEuMzg4IDMuMzA3IDAgMS4yMy40ODMgMi4yNjQgMS40NDcgMy4xMDQuOTY0Ljg0IDIuMTEzIDEuMjUzIDMuNDQ1IDEuMjM0IDEuNDMxLjAxOSAyLjU5NC0uNDA3IDMuNDg5LTEuMjc0Ljg5NC0uODY4IDEuMzQyLTEuOTQzIDEuMzQyLTMuMjI2di0uMDI3em0zLjc1OCA3LjUzNmgtMy42NHYtMi4wMzNoLS4wNThjLS40OTguNjUtMS4xNTQgMS4xODQtMS45NjkgMS42YTguNjY2IDguNjY2IDAgMCAxLTIuNTM1Ljg0bC0uNTUxLjA1NGMtLjE5LjAxOC0uMzczLjAyNy0uNTUyLjAyNy0xLjI3MiAwLTIuNDI2LS4yMjItMy40Ni0uNjY0YTcuNTQ4IDcuNTQ4IDAgMCAxLTIuNjIzLTEuODMgNy43OTYgNy43OTYgMCAwIDEtMS41MjEtMi40OTQgOC4zMTIgOC4zMTIgMCAwIDEtLjUzOC0yLjk4M2MwLTEuMDQ4LjE2NS0yLjAxNC40OTItMi45LjMzLS44ODUuODctMS43MTcgMS42MjYtMi40OTQuODM1LS44ODYgMS43NjQtMS41NDEgMi43ODgtMS45NjYgMS4wMjQtLjQyNCAyLjE0Mi0uNjM3IDMuMzU1LS42MzcgMS4xMzMgMCAyLjE3Ny4yMjIgMy4xMzEuNjY0YTYuNDQgNi40NCAwIDAgMSAyLjQxNiAxLjkzOXYtMi4xNDJoMy42Mzl2MTUuMDE5eiIvPgogICAgICAgIDwvZz4KICAgIDwvZz4KPC9zdmc+Cg==",
+          width: 0,
+          height: 0
+        }
+      }
+    }
+  }
+
+}
+</script>
+<style scoped>
+.big {
+  min-width: 100%;
+}
+
+</style>
