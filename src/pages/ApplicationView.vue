@@ -44,7 +44,7 @@
                     v-model="props.row.note"
                     buttons
                     @save="saveNote(props)"
-                    :title="$t('editname')"
+                    :title="$t('editnotes')"
                   >
                     <q-input v-model="props.row.note" dense autofocus counter/>
                   </q-popup-edit>
