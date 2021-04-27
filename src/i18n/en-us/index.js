@@ -22,6 +22,7 @@ export default {
   nonote: "No notes",
   refresh: "Refresh",
   editname: "Edit name",
+  editnotes: "Edit notes",
   selectedApplication: "Selected application",
   Devices: "Devices",
   homecaption: "Application selector",
