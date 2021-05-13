@@ -39,6 +39,8 @@ Feel free to add the features, and request one.
 
 
 # Developing
+## Notes
+The project uses [Quasar](https://quasar.dev/) which uses Webpack4, so it requires Node.js 14 LTS (as explained [here](https://quasar.dev/quasar-cli/installation) ).
 
 ## Install the dependencies
 ```bash
@@ -59,4 +61,3 @@ npm run lint
 ```bash
 quasar build
 ```
-
