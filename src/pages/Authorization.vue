@@ -6,7 +6,7 @@
             <q-form class="q-gutter-md">
               <q-input square filled clearable v-model="email" type="email" :label="$t('email')" />
               <q-input square filled clearable v-model="password" type="password" :label="$t('password')" />
-              <q-input square filled clearable v-model="link" type="text" :label="$t('link')" />
+              <q-input square filled clearable v-model="link" type="text" :label="$t('link (https://api.yourdomain)')" />
               <q-input square filled clearable v-model="tunneler" type="text" :hint="$t('tunnelerHint')" :label="$t('tunneler')" />
               <q-input square filled clearable v-model="letsencryptdomain" type="text" :hint="$t('letsEncryptSuffixHint')" :label="$t('letsEncryptSuffix')" />
               <q-checkbox v-model="rememberMe" :label="$t('rememberMe')" />
@@ -74,7 +74,7 @@ export default {
           }
         }
       )
-      
+
       const token = await balena.auth.authenticate({ email: this.email, password: this.password })
       await balena.auth.loginWithToken(token)
       this.$store.commit("main/setToken", token)
