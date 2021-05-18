@@ -41,6 +41,7 @@ Feel free to add the features, and request one.
 # Developing
 ## Notes
 The project uses [Quasar](https://quasar.dev/) which uses Webpack4, so it requires Node.js 14 LTS (as explained [here](https://quasar.dev/quasar-cli/installation) ).
+If you use a self-signed certificate for the open-balena server, you need to allow it for your browser or system wide (only Windows).
 
 ## Install the dependencies
 ```bash
