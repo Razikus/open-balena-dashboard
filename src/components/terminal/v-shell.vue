@@ -239,7 +239,7 @@ img {
   display: -moz-box;
   -moz-box-orient: horizontal;
   -moz-box-align: stretch;
-  display: box;
+  display: flex;
   box-orient: horizontal;
   box-align: stretch;
   clear: both;
@@ -257,7 +257,7 @@ img {
   margin-right: 7px;
   display: -webkit-box;
   display: -moz-box;
-  display: box;
+  display: flex;
   box-pack: center;
   box-orient: vertical;
   user-select: none;
