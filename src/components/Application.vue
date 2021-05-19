@@ -6,11 +6,11 @@
     <q-item-section>
       <q-card class="big" bordered>
         <q-card-section>
-          <div class="text-overline text-orange-9">{{ device_type }}</div>
-          <div class="text-h5 q-mt-sm q-mb-xs">{{app_name}}</div>
+          <div class="text-overline text-orange-9 text-center">{{ device_type }}</div>
+          <div class="text-h5 q-mt-sm q-mb-xs text-center">{{app_name}}</div>
           <div class="row">
             <div class="col-12 text-center">
-              <div class="text-h3 q-mt-sm q-mb-xs">{{ owns__device.length }}</div>
+              <div class="text-h3 q-mt-sm q-mb-xs">{{online_devices}}/{{ owns__device.length }}</div>
             </div>
             <div class="col-12 text-center">
               <div class="text-caption text-grey">
@@ -82,6 +82,18 @@ export default {
         this.arch = res.arch
       })
     }
+  },
+  computed: {
+    online_devices() {
+      let count = 0
+      for (const device of this.owns__device) {
+        if (device.is_online === true) {
+          count++
+        }
+      }
+      return count
+    }
   }
+
 }
 </script>
