@@ -31,8 +31,8 @@ export default {
       password: "",
       link: "",
       tunneler: "",
-      letsencryptdomain: ""
-      rememberMe: false, // boolean for checkbox, string for localStorage
+      letsencryptdomain: "",
+      rememberMe: false // boolean for checkbox, string for localStorage
     }
   },
   mounted() {
