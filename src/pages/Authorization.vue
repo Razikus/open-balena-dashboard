@@ -31,24 +31,33 @@ export default {
       password: "",
       link: "",
       tunneler: "",
-      rememberMe: false,
+      rememberMe: false, // boolean for checkbox, string for localStorage
       letsencryptdomain: ""
     }
   },
   mounted() {
-    if (window.localStorage && window.localStorage.rememberMe) {
-      this.rememberMe = (window.localStorage.rememberMe === "true")
-    }
-    if (window.localStorage && window.localStorage.lastOpenBalenaUrl && this.rememberMe) {
-      this.link = window.localStorage.lastOpenBalenaUrl
-    }
-    if (window.localStorage && window.localStorage.lastTunnelerUrl && this.rememberMe) {
-      this.tunneler = window.localStorage.lastTunnelerUrl
-    }
-    if (window.localStorage && window.localStorage.lastSSLSuffix && this.rememberMe) {
-      this.letsencryptdomain = window.localStorage.lastSSLSuffix
+    // boolean for checkbox, string for localStorage
+    if (window.localStorage && window.localStorage.rememberMe === "true") {
+      this.rememberMe = true
+
+      // copy the data from localStorage
+      if (window.localStorage.lastOpenBalenaUrl) {
+        this.link = window.localStorage.lastOpenBalenaUrl
+      }
+      if (window.localStorage.lastTunnelerUrl) {
+        this.tunneler = window.localStorage.lastTunnelerUrl
+      }
+      if (window.localStorage.lastSSLSuffix) {
+        this.letsencryptdomain = window.localStorage.lastSSLSuffix
+      }
+      if (window.localStorage.lastEmail) {
+        this.email = window.localStorage.lastEmail
+      }
+    } else { // doesn't copy the data
+      this.rememberMe = false
     }
   },
+
   methods: {
     async tryToLogin() {
       const balena = getSdk({
@@ -83,14 +92,17 @@ export default {
       this.$store.commit("main/setSSLSuffix", this.letsencryptdomain)
       this.$router.push("home")
 
-      if (window.localStorage) {
-        if (this.rememberMe) {
+      if (window.localStorage) { // only string stored in localStorage (conversion)
+        if (this.rememberMe === true) {
           window.localStorage.lastOpenBalenaUrl = this.link
           if (this.tunneler) {
             window.localStorage.lastTunnelerUrl = this.tunneler
           }
           if (this.letsencryptdomain) {
             window.localStorage.lastSSLSuffix = this.letsencryptdomain
+          }
+          if (this.email) {
+            window.localStorage.lastEmail = this.email
           }
           window.localStorage.rememberMe = this.rememberMe
         } else {
