@@ -31,8 +31,8 @@ export default {
       password: "",
       link: "",
       tunneler: "",
-      rememberMe: false, // boolean for checkbox, string for localStorage
       letsencryptdomain: ""
+      rememberMe: false, // boolean for checkbox, string for localStorage
     }
   },
   mounted() {
@@ -41,6 +41,9 @@ export default {
       this.rememberMe = true
 
       // copy the data from localStorage
+      if (window.localStorage.lastEmail) {
+        this.email = window.localStorage.lastEmail
+      }
       if (window.localStorage.lastOpenBalenaUrl) {
         this.link = window.localStorage.lastOpenBalenaUrl
       }
@@ -49,9 +52,6 @@ export default {
       }
       if (window.localStorage.lastSSLSuffix) {
         this.letsencryptdomain = window.localStorage.lastSSLSuffix
-      }
-      if (window.localStorage.lastEmail) {
-        this.email = window.localStorage.lastEmail
       }
     } else { // doesn't copy the data
       this.rememberMe = false
@@ -92,23 +92,26 @@ export default {
       this.$store.commit("main/setSSLSuffix", this.letsencryptdomain)
       this.$router.push("home")
 
-      if (window.localStorage) { // only string stored in localStorage (conversion)
+      // write data to local storage or delete it
+      // only string stored in localStorage (conversion)
+      if (window.localStorage) {
         if (this.rememberMe === true) {
+          window.localStorage.rememberMe = this.rememberMe
+          window.localStorage.lastEmail = this.email
           window.localStorage.lastOpenBalenaUrl = this.link
+
           if (this.tunneler) {
             window.localStorage.lastTunnelerUrl = this.tunneler
           }
           if (this.letsencryptdomain) {
             window.localStorage.lastSSLSuffix = this.letsencryptdomain
           }
-          if (this.email) {
-            window.localStorage.lastEmail = this.email
-          }
-          window.localStorage.rememberMe = this.rememberMe
         } else {
-          delete window.localStorage.lastTunnelerUrl
-          delete window.localStorage.lastOpenBalenaUrl
           delete window.localStorage.rememberMe
+          delete window.localStorage.lastEmail
+          delete window.localStorage.lastOpenBalenaUrl
+          delete window.localStorage.lastTunnelerUrl
+          delete window.localStorage.lastSSLSuffix
         }
       }
     }
