@@ -65,7 +65,7 @@
             <q-btn :to="'/deviceenvs/' + $route.params.id + '/' +  props.row.uuid">
               {{ $t("editDeviceEnv") }}
             </q-btn>
-            <q-btn @click="switchApp(props)" v-if="props.row.is_online">
+            <q-btn  v-if="props.row.is_online"> <!-- @click="switchApp(props)"-->
               {{ $t("switch application") }}
               <q-popup-edit
                 buttons
@@ -268,11 +268,11 @@ export default {
       await this.$store.state.main.sdk.models.device.restartApplication(what.row.uuid)
       this.loading = false
     },
-    async switchApp(what) {
-      this.loading = true
-  //    await this.$store.state.main.sdk.models.device.move(what.row.uuid, )
-      this.loading = false
-    },
+  //   async switchApp(what) {
+  //     this.loading = true
+  // //    await this.$store.state.main.sdk.models.device.move(what.row.uuid, )
+  //     this.loading = false
+  //   },
     async loadApplicationDetails() {
       const devices = await this.$store.state.main.sdk.models.device.getAllByApplication(
         this.$route.params.id
