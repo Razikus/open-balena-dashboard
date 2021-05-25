@@ -19,14 +19,14 @@
                 <q-item-label>{{ col.label }}</q-item-label>
               </q-item-section>
               <q-item-section side>
-                <q-item-label v-if="col.name == 'is_online'">
+                <q-item-label v-if="col.name === 'is_online'">
                   <Dot color="green" v-if="props.row.is_online"></Dot>
                   <Dot color="red" v-else></Dot>
                   /
                   <Dot color="green" v-if="props.row.is_connected_to_vpn"></Dot>
                   <Dot color="red" v-else></Dot>
                 </q-item-label>
-                <q-item-label v-else-if="col.name == 'device_name'">
+                <q-item-label v-else-if="col.name === 'device_name'">
                   {{ col.value }}
                   <q-popup-edit
                     v-model="props.row.device_name"
@@ -37,7 +37,7 @@
                     <q-input v-model="props.row.device_name" dense autofocus counter/>
                   </q-popup-edit>
                 </q-item-label>
-                <q-item-label v-else-if="col.name == 'note'">
+                <q-item-label v-else-if="col.name === 'note'">
                   <span v-if="props.row.note !== null"> {{ col.value }}</span>
                   <span v-else>{{ $t("nonote") }}</span>
                   <q-popup-edit
@@ -56,17 +56,24 @@
           <q-separator/>
           <q-card-section>
             <q-btn @click="showLog(props.row.uuid)">{{ $t("logs") }}</q-btn>
-            <q-btn @click="reboot(props)" v-if="props.row.is_online">{{
-                $t("reboot")
-              }}
+            <q-btn @click="reboot(props)" v-if="props.row.is_online">
+              {{ $t("reboot") }}
             </q-btn>
-            <q-btn @click="restart(props)" v-if="props.row.is_online">{{
-                $t("restart")
-              }}
+            <q-btn @click="restart(props)" v-if="props.row.is_online">
+              {{ $t("restart") }}
             </q-btn>
-            <q-btn :to="'/deviceenvs/' + $route.params.id + '/' +  props.row.uuid">{{
-                $t("editDeviceEnv")
-              }}
+            <q-btn :to="'/deviceenvs/' + $route.params.id + '/' +  props.row.uuid">
+              {{ $t("editDeviceEnv") }}
+            </q-btn>
+            <q-btn @click="switchApp(props)" v-if="props.row.is_online">
+              {{ $t("switch application") }}
+              <q-popup-edit
+                buttons
+                @save="switchApp(props)"
+                :title="$t('new app name')"
+              >
+                <q-input dense autofocus counter/>
+              </q-popup-edit>
             </q-btn>
           </q-card-section>
           <q-separator/>
@@ -122,6 +129,7 @@
     </q-table>
   </q-page>
 </template>
+
 <script>
 import Dot from "../components/Dot"
 import LogTerminal from "components/LogTerminal"
@@ -258,6 +266,11 @@ export default {
     async restart(what) {
       this.loading = true
       await this.$store.state.main.sdk.models.device.restartApplication(what.row.uuid)
+      this.loading = false
+    },
+    async switchApp(what) {
+      this.loading = true
+  //    await this.$store.state.main.sdk.models.device.move(what.row.uuid, )
       this.loading = false
     },
     async loadApplicationDetails() {

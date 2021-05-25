@@ -63,6 +63,7 @@ export default {
       const balena = getSdk({
           apiUrl: this.link
       })
+
       balena.interceptors.push({
           responseError: (error) => {
               this.$q.notify({
@@ -73,6 +74,7 @@ export default {
           }
         }
       )
+      // why 2 times ?
       balena.interceptors.push({
           requestError: (error) => {
               this.$q.notify({
@@ -85,7 +87,7 @@ export default {
       )
 
       const token = await balena.auth.authenticate({ email: this.email, password: this.password })
-      await balena.auth.loginWithToken(token)
+      await balena.auth.loginWithToken(token) // sync login
       this.$store.commit("main/setToken", token)
       this.$store.commit("main/setSDK", balena)
       this.$store.commit("main/setTunnelerUrl", this.tunneler)

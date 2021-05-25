@@ -45,6 +45,7 @@
           {{ $t('selected application: ') }}
           <span class= "text-bold">{{ $store.state.main.selectedApplication }}</span>
         </q-item-label>
+
         <EssentialLink
           v-for="link in appLinks"
           :key="link.title"
@@ -89,6 +90,15 @@ export default {
             return { id: this.$store.state.main.selectedApplication }
           }
         },
+        // {
+        //   title: 'Versions',
+        //   caption: '',
+        //   icon: 'update',
+        //   link: '',
+        //   param: () => {
+        //     return { id: this.$store.state.main.selectedApplication }
+        //   }
+        // },
         {
           title: 'Env',
           caption: 'envcaption',
