@@ -61,7 +61,7 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Close" color="primary" v-close-popup @click="clearPopupText()" />
+          <q-btn flat label="Close" color="primary" v-close-popup />
           <q-btn flat label="Create" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
@@ -94,6 +94,9 @@ export default {
     },
     clearPopupText: function() { // @cancel -> function(value, initialValue)
       this.newApp.name = ""
+      this.$store.state.main.sdk.models.deviceType.getAllSupported.then(function(deviceTypes) {
+        console.log(deviceTypes)
+      })
     }
   }
 }
