@@ -44,7 +44,7 @@
     :data="appConfigVars"
     :columns="columns"
     :loading="loading || parentLoading"
-    :title="$t('ConfigVars')"
+    :title="$t('ConfigVars for fleet (single application)')"
   >
       <template v-slot:body="props">
         <q-tr :props="props">
@@ -86,6 +86,9 @@
 </template>
 
 <script>
+const emptyConfig = { name: "BALENA_", value: "" }
+const emptyEnv = { name: "", value: "" }
+
 export default {
   name: 'DeviceEnvEditor',
   data () {
@@ -96,13 +99,16 @@ export default {
         { name: "Value", label: this.$t("value"), field: "value", align: "left" },
         { name: "Action", label: this.$t("actions"), field: "value", align: "left" }
       ],
-      newConfig: { name: "BALENA_", value: "" },
-      newEnv: { name: "", value: "" }
+      emptyConfig,
+      newConfig: emptyConfig,
+      emptyEnv,
+      newEnv: emptyEnv
     }
   },
   methods: {
     async saveConfig() {
       await this.$store.state.main.sdk.models.device.configVar.set(this.$route.params.deviceid, this.newConfig.name, this.newConfig.value)
+      this.newConfig = this.emptyConfig
       this.reload()
     },
     async deleteConfig(props) {
@@ -115,6 +121,7 @@ export default {
     },
     async saveEnv() {
       await this.$store.state.main.sdk.models.device.envVar.set(this.$route.params.deviceid, this.newEnv.name, this.newEnv.value)
+      this.newEnv = this.emptyEnv
       this.reload()
     },
     async deleteEnv(props) {

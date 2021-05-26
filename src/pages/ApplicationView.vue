@@ -65,7 +65,8 @@
             <q-btn :to="'/deviceenvs/' + $route.params.id + '/' +  props.row.uuid">
               {{ $t("editDeviceEnv") }}
             </q-btn>
-            <q-btn  v-if="props.row.is_online"> <!-- @click="switchApp(props)"-->
+<!--  dialog for changing app for a device 
+         <q-btn  v-if="props.row.is_online">
               {{ $t("switch application") }}
               <q-popup-edit
                 buttons
@@ -75,6 +76,7 @@
                 <q-input dense autofocus counter/>
               </q-popup-edit>
             </q-btn>
+  -->
           </q-card-section>
           <q-separator/>
           <q-card-section v-if="$store.state.main.tunnelerUrl">
@@ -230,6 +232,7 @@ export default {
           sortable: true
         }
       ]
+
     }
   },
   mounted() {

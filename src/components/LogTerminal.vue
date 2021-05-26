@@ -11,6 +11,7 @@
     </q-card>
   </q-dialog>
 </template>
+
 <script>
 
 import shell from './terminal/v-shell'
@@ -32,7 +33,7 @@ export default {
   },
   mounted() {
     this.terminalUtil = new TerminalCommandsUtil(this.uuid, this.$store.state.main.sdk)
-    this.getServicesForDevice(this.uuid)
+    this.terminalUtil.getServicesForDevice(this.uuid)
   },
   methods: {
     detach() {
