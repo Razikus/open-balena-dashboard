@@ -1,47 +1,9 @@
 <template>
 <div>
+  <h6>The devices settings override the application ones</h6>
+
   <q-table
-    :data="currentEnvs"
-    :columns="columns"
-    :loading="loading || parentLoading"
-    :title="$t('DeviceEnvVars')"
-  >
-      <template v-slot:body="props">
-        <q-tr :props="props">
-          <q-td key="Name" :props="props">
-            {{ props.row.name }}
-          </q-td>
-          <q-td key="Value" :props="props">
-            {{ props.row.value }}
-            <q-popup-edit v-model="props.row.value" @save="updateEnv(props)">
-              <q-input v-model="props.row.value" dense autofocus counter />
-            </q-popup-edit>
-            </q-td>
-          <q-td key="Action" :props="props">
-            <q-btn @click="deleteEnv(props)">{{$t("delete")}}</q-btn>
-
-          </q-td>
-        </q-tr>
-      </template>
-
-      <template v-slot:bottom-row>
-        <q-tr>
-          <q-td>
-            <q-input filled v-model="newEnv.name" :label="$t('name')" />
-          </q-td>
-
-          <q-td key="Value">
-            <q-input filled v-model="newEnv.value" :label="$t('value')" />
-          </q-td>
-          <q-td key="Action">
-            <q-btn @click="saveEnv">Save</q-btn>
-          </q-td>
-        </q-tr>
-      </template>
-
-  </q-table>
-  <q-table
-    :data="appConfigVars"
+    :data="deviceConfigVars"
     :columns="columns"
     :loading="loading || parentLoading"
     :title="$t('ConfigVars)')"
@@ -55,7 +17,7 @@
           <q-td key="Value" :props="props">
             {{ props.row.value }}
             <q-popup-edit v-model="props.row.value" @save="updateConfig(props)">
-              <q-input v-model="props.row.value" dense autofocus counter />
+              <q-input v-model="props.row.value" dense counter />
             </q-popup-edit>
 
             </q-td>
@@ -82,6 +44,89 @@
       </template>
 
   </q-table>
+
+  <q-table
+    :data="deviceEnvVars"
+    :columns="columns"
+    :loading="loading || parentLoading"
+    :title="$t('DeviceEnvVars')"
+  >
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td key="Name" :props="props">
+            {{ props.row.name }}
+          </q-td>
+          <q-td key="Value" :props="props">
+            {{ props.row.value }}
+            <q-popup-edit v-model="props.row.value" @save="updateEnv(props)">
+              <q-input v-model="props.row.value" dense counter />
+            </q-popup-edit>
+            </q-td>
+          <q-td key="Action" :props="props">
+            <q-btn @click="deleteEnv(props)">{{$t("delete")}}</q-btn>
+
+          </q-td>
+        </q-tr>
+      </template>
+
+      <template v-slot:bottom-row>
+        <q-tr>
+          <q-td>
+            <q-input filled v-model="newEnv.name" :label="$t('name')" />
+          </q-td>
+
+          <q-td key="Value">
+            <q-input filled v-model="newEnv.value" :label="$t('value')" />
+          </q-td>
+          <q-td key="Action">
+            <q-btn @click="saveEnv">Save</q-btn>
+          </q-td>
+        </q-tr>
+      </template>
+
+  </q-table>
+
+  <q-table
+    :data="serviceEnvVars"
+    :columns="columns"
+    :loading="loading || parentLoading"
+    :title="$t('ServiceEnvVars')"
+  >
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td key="Name" :props="props">
+            {{ props.row.name }}
+          </q-td>
+          <q-td key="Value" :props="props">
+            {{ props.row.value }}
+            <q-popup-edit v-model="props.row.value" @save="updateService(props)">
+              <q-input v-model="props.row.value" dense counter />
+            </q-popup-edit>
+            </q-td>
+          <q-td key="Action" :props="props">
+            <q-btn @click="deleteService(props)">{{$t("delete")}}</q-btn>
+
+          </q-td>
+        </q-tr>
+      </template>
+
+      <template v-slot:bottom-row>
+        <q-tr>
+          <q-td>
+            <q-input filled v-model="newService.name" :label="$t('name')" />
+          </q-td>
+
+          <q-td key="Value">
+            <q-input filled v-model="newService.value" :label="$t('value')" />
+          </q-td>
+          <q-td key="Action">
+            <q-btn @click="saveService">Save</q-btn>
+          </q-td>
+        </q-tr>
+      </template>
+
+  </q-table>
+
   </div>
 </template>
 
@@ -102,13 +147,14 @@ export default {
       emptyConfig,
       newConfig: emptyConfig,
       emptyEnv,
-      newEnv: emptyEnv
+      newEnv: emptyEnv,
+      newService: emptyEnv
     }
   },
   methods: {
     async saveConfig() {
       await this.$store.state.main.sdk.models.device.configVar.set(this.$route.params.deviceid, this.newConfig.name, this.newConfig.value)
-      this.newConfig = this.emptyConfig
+      this.newConfig = this.emptyConfig // clear input form
       this.reload()
     },
     async deleteConfig(props) {
@@ -119,9 +165,10 @@ export default {
       await this.$store.state.main.sdk.models.device.configVar.set(this.$route.params.deviceid, props.row.name, props.row.value)
       this.reload()
     },
+
     async saveEnv() {
       await this.$store.state.main.sdk.models.device.envVar.set(this.$route.params.deviceid, this.newEnv.name, this.newEnv.value)
-      this.newEnv = this.emptyEnv
+      this.newEnv = this.emptyEnv // clear input form
       this.reload()
     },
     async deleteEnv(props) {
@@ -132,16 +179,35 @@ export default {
       await this.$store.state.main.sdk.models.device.envVar.set(this.$route.params.deviceid, props.row.name, props.row.value)
       this.reload()
     },
+
+    async saveService() {
+      await this.$store.state.main.sdk.models.device.serviceVar.set(this.$route.params.deviceid, this.newEnv.name, this.newEnv.value)
+      this.newService = this.emptyEnv // clear input form
+      this.reload()
+    },
+    async deleteService(props) {
+      await this.$store.state.main.sdk.models.device.serviceVar.remove(this.$route.params.deviceid, props.row.name)
+      this.reload()
+    },
+    async updateService(props) {
+      await this.$store.state.main.sdk.models.device.serviceVar.set(this.$route.params.deviceid, props.row.name, props.row.value)
+      this.reload()
+    },
+
     async reload() {
       this.$emit("reload")
     }
   },
   props: {
-    currentEnvs: {
+    deviceConfigVars: {
       type: Array,
       required: true
     },
-    appConfigVars: {
+    deviceEnvVars: {
+      type: Array,
+      required: true
+    },
+    deviceServiceVars: {
       type: Array,
       required: true
     },

@@ -16,7 +16,7 @@
           <q-td key="Value" :props="props">
             {{ props.row.value }}
             <q-popup-edit v-model="props.row.value" @save="updateConfig(props)">
-              <q-input v-model="props.row.value" dense autofocus counter />
+              <q-input v-model="props.row.value" dense counter />
             </q-popup-edit>
           </q-td>
 
@@ -59,7 +59,7 @@
           <q-td key="Value" :props="props">
             {{ props.row.value }}
             <q-popup-edit v-model="props.row.value" @save="updateEnv(props)">
-              <q-input v-model="props.row.value" dense autofocus counter />
+              <q-input v-model="props.row.value" dense counter />
             </q-popup-edit>
 
             </q-td>
@@ -102,7 +102,7 @@
           <q-td key="Value" :props="props">
             {{ props.row.value }}
             <q-popup-edit v-model="props.row.value" @save="updateBuild(props)">
-              <q-input v-model="props.row.value" dense autofocus counter />
+              <q-input v-model="props.row.value" dense counter />
             </q-popup-edit>
 
             </q-td>

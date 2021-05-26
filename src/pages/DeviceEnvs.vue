@@ -1,6 +1,9 @@
 <template>
   <q-page padding>
-    <DeviceEnvEditor v-on:reload="loadEnvs" :currentEnvs="envVars" :appConfigVars="configVars" :parentLoading="loading"></DeviceEnvEditor>
+    <DeviceEnvEditor v-on:reload="loadEnvs" :parentLoading="loading"
+      :deviceConfigVars="configVars" :deviceEnvVars="envVars" :deviceServiceVars="serviceVars" 
+    >
+    </DeviceEnvEditor>
   </q-page>
 </template>
 
@@ -11,8 +14,9 @@ export default {
   data() {
     return {
       loading: false,
+      configVars: [],
       envVars: [],
-      configVars: []
+      serviceVars: []
     }
   },
   components: { DeviceEnvEditor },
@@ -22,8 +26,9 @@ export default {
   methods: {
     async loadEnvs() {
       this.loading = true
-      this.envVars = await this.$store.state.main.sdk.models.device.envVar.getAllByDevice(this.$route.params.deviceid)
       this.configVars = await this.$store.state.main.sdk.models.device.configVar.getAllByDevice(this.$route.params.deviceid)
+      this.envVars = await this.$store.state.main.sdk.models.device.envVar.getAllByDevice(this.$route.params.deviceid)
+      this.serviceVars = await this.$store.state.main.sdk.models.device.serviceVar.getAllByDevice(this.$route.params.deviceid)
       this.loading = false
     }
   }
