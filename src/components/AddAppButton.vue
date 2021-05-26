@@ -20,11 +20,13 @@
 
         <q-card-section>
           <q-input v-model="newApp.name" :label="$t('App Name')" dense autofocus
-            minlength="4" maxlength="10"
+            minlength="4" maxlength="10" style="font-size: large;"
           />
         </q-card-section>
         <q-card-section>
-          <q-input v-model="newApp.organization" :label="$t('Organization')" type="text" dense />
+          <q-input v-model="newApp.organization" :label="$t('Organization')" type="text"
+            style="font-size: large;" dense
+          />
         </q-card-section>
 
         <q-card-section>
@@ -37,6 +39,7 @@
               :options="options"
               @filter="filterFn"
               behavior="menu"
+              style="font-size: large;"
             >
               <template v-slot:no-option>
                 <q-item>
@@ -61,6 +64,7 @@
 
 // device types handcoded because the sdk call is not working
 // this.$store.state.main.sdk.models.deviceType.getAllSupported()
+
 const SLUG = ["aio-3288c", "astro-tx2", "asus-tinker-board", "asus-tinker-board-s", "bananapi-m1-plus",
  "beagleboard-xm", "beaglebone-black", "beaglebone-green", "beaglebone-green-gateway", "beaglebone-green-wifi",
  "beaglebone-pocket", "blackboard-tx2", "ccimx8x-sbc-pro", "cl-som-imx8", "coral-dev", "etcher-pro", "fincm3",
@@ -74,6 +78,7 @@ const SLUG = ["aio-3288c", "astro-tx2", "asus-tinker-board", "asus-tinker-board-
  "surface-go", "surface-pro-6", "ts4900", "up-board", "var-som-mx6"
 ]
 
+// there are also aliases, not included.
 const NAME = ["AIO 3288C   armv7hf", "CTI Astro TX2 G+ (NEW)   aarch64", "Asus Tinker Board (NEW)   armv7hf",
  "Asus Tinker Board S (NEW)   armv7hf", "BananaPi-M1+ (NEW)   armv7hf", "BeagleBoard-XM (NEW)   armv7hf",
  "BeagleBone Black   armv7hf", "BeagleBone Green   armv7hf", "BeagleBone Green Gateway   armv7hf",

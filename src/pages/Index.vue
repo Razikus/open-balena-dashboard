@@ -6,7 +6,7 @@
       :key="app.title"
       v-bind="app"
     />
-    
+
     <AddAppButton/>
   </q-page>
 </template>
