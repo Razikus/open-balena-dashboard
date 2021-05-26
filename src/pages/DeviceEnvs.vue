@@ -7,7 +7,7 @@
 <script>
 import DeviceEnvEditor from "../components/DeviceEnvEditor"
 export default {
-  
+
   data() {
     return {
       loading: false,

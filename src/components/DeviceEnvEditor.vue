@@ -44,7 +44,7 @@
     :data="appConfigVars"
     :columns="columns"
     :loading="loading || parentLoading"
-    :title="$t('ConfigVars for fleet (single application)')"
+    :title="$t('ConfigVars)')"
   >
       <template v-slot:body="props">
         <q-tr :props="props">
