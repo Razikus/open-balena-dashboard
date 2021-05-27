@@ -25,8 +25,8 @@ https://play.google.com/store/apps/details?id=eu.razniewski.openbalena.dashboard
 * Restart application on device
 * Expose port 80 of the device on dynamic DNS http://xip.io  (check https://github.com/Razikus/open-balena-tunneler)
 * Expose ssh of the device on dynamic DNS http://xip.io with webssh client (check https://github.com/Razikus/open-balena-tunneler)
-* Change and check environment variables of applications
-* Change device environment variable
+* Change and check variables of applications
+* Change nd check variables of devices
 
 # Features plan list
 * Add applications

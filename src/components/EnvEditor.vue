@@ -1,6 +1,6 @@
 <template>
 <div>
-
+  <p>Warning broken SDK</p>
   <q-table
     :data="appConfigVars"
     :columns="columns"
@@ -151,21 +151,9 @@ export default {
   },
   methods: {
 
-    async saveEnv() {
-      await this.$store.state.main.sdk.models.application.envVar.set(this.$route.params.id, this.newEnv.name, this.newEnv.value)
-      this.reload()
-    },
-    async deleteEnv(props) {
-      await this.$store.state.main.sdk.models.application.envVar.remove(this.$route.params.id, props.row.name)
-      this.reload()
-    },
-    async updateEnv(props) {
-      await this.$store.state.main.sdk.models.application.envVar.set(this.$route.params.id, props.row.name, props.row.value)
-      this.reload()
-    },
-
     async saveConfig() {
       await this.$store.state.main.sdk.models.application.configVar.set(this.$route.params.id, this.newConfig.name, this.newConfig.value)
+      this.newConfig = { name: "BALENA_", value: "" }
       this.reload()
     },
     async deleteConfig(props) {
@@ -177,8 +165,23 @@ export default {
       this.reload()
     },
 
+    async saveEnv() {
+      await this.$store.state.main.sdk.models.application.envVar.set(this.$route.params.id, this.newEnv.name, this.newEnv.value)
+      this.newEnv = { name: "", value: "" }
+      this.reload()
+    },
+    async deleteEnv(props) {
+      await this.$store.state.main.sdk.models.application.envVar.remove(this.$route.params.id, props.row.name)
+      this.reload()
+    },
+    async updateEnv(props) {
+      await this.$store.state.main.sdk.models.application.envVar.set(this.$route.params.id, props.row.name, props.row.value)
+      this.reload()
+    },
+
     async saveBuild() {
       await this.$store.state.main.sdk.models.application.buildVar.set(this.$route.params.id, this.newBuild.name, this.newBuild.value)
+      this.newBuild = { name: "", value: "" }
       this.reload()
     },
     async deleteBuild(props) {

@@ -1,12 +1,13 @@
 <template>
 <div>
-  <h6>The devices settings override the application ones</h6>
+  <h6 style="margin-top: 20px; margin-bottom: 20px;">The devices settings override the application ones</h6>
+  <p>Warning broken SDK</p>
 
   <q-table
     :data="deviceConfigVars"
     :columns="columns"
     :loading="loading || parentLoading"
-    :title="$t('ConfigVars)')"
+    :title="$t('ConfigVars')"
   >
       <template v-slot:body="props">
         <q-tr :props="props">
@@ -17,7 +18,7 @@
           <q-td key="Value" :props="props">
             {{ props.row.value }}
             <q-popup-edit v-model="props.row.value" @save="updateConfig(props)">
-              <q-input v-model="props.row.value" dense counter />
+              <q-input v-model="props.row.value" dense counter/>
             </q-popup-edit>
 
             </q-td>
@@ -87,7 +88,7 @@
   </q-table>
 
   <q-table
-    :data="serviceEnvVars"
+    :data="deviceServiceVars"
     :columns="columns"
     :loading="loading || parentLoading"
     :title="$t('ServiceEnvVars')"
@@ -131,8 +132,6 @@
 </template>
 
 <script>
-const emptyConfig = { name: "BALENA_", value: "" }
-const emptyEnv = { name: "", value: "" }
 
 export default {
   name: 'DeviceEnvEditor',
@@ -144,17 +143,15 @@ export default {
         { name: "Value", label: this.$t("value"), field: "value", align: "left" },
         { name: "Action", label: this.$t("actions"), field: "value", align: "left" }
       ],
-      emptyConfig,
-      newConfig: emptyConfig,
-      emptyEnv,
-      newEnv: emptyEnv,
-      newService: emptyEnv
+      newConfig: { name: "BALENA_", value: "" },
+      newEnv: { name: "", value: "" },
+      newService: { name: "", value: "" }
     }
   },
   methods: {
     async saveConfig() {
       await this.$store.state.main.sdk.models.device.configVar.set(this.$route.params.deviceid, this.newConfig.name, this.newConfig.value)
-      this.newConfig = this.emptyConfig // clear input form
+      this.newConfig = { name: "BALENA_", value: "" } // clear input form
       this.reload()
     },
     async deleteConfig(props) {
@@ -168,7 +165,7 @@ export default {
 
     async saveEnv() {
       await this.$store.state.main.sdk.models.device.envVar.set(this.$route.params.deviceid, this.newEnv.name, this.newEnv.value)
-      this.newEnv = this.emptyEnv // clear input form
+      this.newEnv = { name: "", value: "" } // clear input form
       this.reload()
     },
     async deleteEnv(props) {
@@ -182,7 +179,7 @@ export default {
 
     async saveService() {
       await this.$store.state.main.sdk.models.device.serviceVar.set(this.$route.params.deviceid, this.newEnv.name, this.newEnv.value)
-      this.newService = this.emptyEnv // clear input form
+      this.newService = { name: "", value: "" } // clear input form
       this.reload()
     },
     async deleteService(props) {
