@@ -44,7 +44,7 @@
                 </q-item-label>
 
                 <q-item-label v-else-if="col.name === 'note'">
-                  <span v-if="props.row.note !== null"> {{ col.value }}</span>
+                  <span v-if="props.row.note !== null && props.row.note !== '' "> {{ col.value }}</span>
                   <span v-else>{{ $t("nonote") }}</span>
                   <q-popup-edit
                     v-model="props.row.note"
@@ -201,6 +201,14 @@ export default {
           sortable: true
         },
         {
+          name: "os_version",
+          label: this.$t("os_version"),
+          align: "left",
+          field: (row) => [row.os_version, row.os_variant],
+          format: ([val1, val2]) => `${val1}` + "  " + `${val2}`,
+          sortable: true
+        },
+        {
           name: "note",
           label: this.$t("note"),
           align: "left",
@@ -253,6 +261,7 @@ export default {
     setInterval(() => {
         if (this.blockRefresh !== true) {
           this.loadApplicationDetails()
+          console.log("update device table")
         }
       }
     , 5000)
@@ -284,17 +293,17 @@ export default {
       await this.$store.state.main.sdk.models.device.reboot(what.row.uuid)
       this.loading = false
     },
+    async restart(what) {
+      this.loading = true
+      await this.$store.state.main.sdk.models.device.restartApplication(what.row.uuid)
+      this.loading = false
+    },
     async saveDeviceName(what) {
       this.loading = true
       await this.$store.state.main.sdk.models.device.rename(
         what.row.uuid,
         what.row.device_name
       )
-      this.loading = false
-    },
-    async restart(what) {
-      this.loading = true
-      await this.$store.state.main.sdk.models.device.restartApplication(what.row.uuid)
       this.loading = false
     },
   //   async switchApp(what) {
