@@ -46,6 +46,6 @@ export default {
   letsEncryptSuffixHint: "Example '.s1.blabla.com' - will expose DEVICEUUID.s1.blabla.com as SSL",
   mac_address: "Mac addresses",
   editDeviceEnv: "Edit envs",
-  // DeviceEnvVars: "Device env vars (higher priority than application envs)",
+  DeviceEnvVars: "Device env vars",
   delete: "Delete"
 }

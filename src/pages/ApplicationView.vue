@@ -14,46 +14,57 @@
       <template v-slot:item="props">
         <q-card class="col-xl-3 col-md-4 col-sm-12 col-xs-12">
           <q-list dense>
-            <q-item v-for="col in props.cols" :key="col.name">
+            <q-item v-for="col in props.cols" :key="col.name"> <!-- !! render rows + conditional rendering !! -->
+
               <q-item-section>
                 <q-item-label>{{ col.label }}</q-item-label>
               </q-item-section>
+
               <q-item-section side>
                 <q-item-label v-if="col.name === 'is_online'">
                   <Dot color="green" v-if="props.row.is_online"></Dot>
                   <Dot color="red" v-else></Dot>
-                  /
+                  <span style=" font-size: 25px; ">/</span>
                   <Dot color="green" v-if="props.row.is_connected_to_vpn"></Dot>
                   <Dot color="red" v-else></Dot>
                 </q-item-label>
+
                 <q-item-label v-else-if="col.name === 'device_name'">
                   {{ col.value }}
                   <q-popup-edit
                     v-model="props.row.device_name"
                     buttons
+                    @before-show="preventRefresh"
                     @save="saveDeviceName(props)"
+                    @hide="allowRefresh"
                     :title="$t('editname')"
                   >
                     <q-input v-model="props.row.device_name" dense autofocus counter/>
                   </q-popup-edit>
                 </q-item-label>
+
                 <q-item-label v-else-if="col.name === 'note'">
                   <span v-if="props.row.note !== null"> {{ col.value }}</span>
                   <span v-else>{{ $t("nonote") }}</span>
                   <q-popup-edit
                     v-model="props.row.note"
                     buttons
+                    @before-show="preventRefresh"
                     @save="saveNote(props)"
+                    @hide="allowRefresh"
                     :title="$t('editnotes')"
                   >
                     <q-input v-model="props.row.note" dense autofocus counter/>
                   </q-popup-edit>
                 </q-item-label>
+
                 <q-item-label v-else>{{ col.value }}</q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
+
           <q-separator/>
+
           <q-card-section>
             <q-btn @click="showLog(props.row.uuid)">{{ $t("logs") }}</q-btn>
             <q-btn @click="reboot(props)" v-if="props.row.is_online">
@@ -65,7 +76,7 @@
             <q-btn :to="'/deviceenvs/' + $route.params.id + '/' +  props.row.uuid">
               {{ $t("editDeviceEnv") }}
             </q-btn>
-<!--  dialog for changing app for a device 
+<!--  dialog for changing app for a device
          <q-btn  v-if="props.row.is_online">
               {{ $t("switch application") }}
               <q-popup-edit
@@ -152,6 +163,7 @@ export default {
       appEnvVars: [],
       appConfigVars: [],
       deviceLoadingState: {},
+      blockRefresh: false,
       pagination: {
         rowsPerPage: 20
       },
@@ -236,11 +248,25 @@ export default {
     }
   },
   mounted() {
-    this.loadApplicationDetails()
-    setInterval(this.loadApplicationDetails, 5000)
+    this.loadApplicationDetails() // first load
+
+    setInterval(() => {
+        if (this.blockRefresh !== true) {
+          this.loadApplicationDetails()
+        }
+      }
+    , 5000)
+
     this.$store.commit("main/selectApplication", this.$route.params.id)
   },
+
   methods: {
+    allowRefresh() {
+      this.blockRefresh = false
+    },
+    preventRefresh() {
+      this.blockRefresh = true
+    },
     async saveNote(what) {
       this.loading = true
       await this.$store.state.main.sdk.models.device.note(what.row.uuid, what.row.note)
@@ -276,6 +302,7 @@ export default {
   // //    await this.$store.state.main.sdk.models.device.move(what.row.uuid, )
   //     this.loading = false
   //   },
+
     async loadApplicationDetails() {
       const devices = await this.$store.state.main.sdk.models.device.getAllByApplication(
         this.$route.params.id
