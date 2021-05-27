@@ -48,6 +48,7 @@ export default {
   os_version: "OS version",
   cpu_usage: "CPU usage",
   is_web_accessible: "Accessible from web",
+  local_mode: "Local Mode",
   supervisor_version: "Supervisor Version",
   editDeviceEnv: "Edit envs",
   DeviceEnvVars: "Device env vars",

@@ -16,10 +16,12 @@
           <q-list dense>
             <q-item v-for="col in props.cols" :key="col.name"> <!-- !! render rows + conditional rendering !! -->
 
-              <q-item-section>
+              <!-- Left side of the card -->
+              <q-item-section> <!-- default case-->
                 <q-item-label>{{ col.label }}</q-item-label>
               </q-item-section>
 
+              <!-- Right side of the card-->
               <q-item-section side>
                 <q-item-label v-if="col.name === 'is_online'">
                   <Dot color="green" v-if="props.row.is_online"></Dot>
@@ -58,7 +60,13 @@
                   </q-popup-edit>
                 </q-item-label>
 
+                <q-item-label class="q-pa-md" v-else-if="col.name === 'local_mode'">
+                    <q-toggle v-model=" " />
+                </q-item-label>
+
+                <!-- defalut case-->
                 <q-item-label v-else>{{ col.value }}</q-item-label>
+
               </q-item-section>
             </q-item>
           </q-list>
@@ -164,6 +172,7 @@ export default {
       appConfigVars: [],
       deviceLoadingState: {},
       blockRefresh: false,
+      localMode: [], // array of obj {uuid, status}
       pagination: {
         rowsPerPage: 20
       },
@@ -274,6 +283,14 @@ export default {
           field: (row) => row.created_at,
           format: (val) => `${new Date(val).toLocaleString()}`,
           sortable: true
+        },
+        {
+          name: "local_mode",
+          label: this.$t("local_mode"),
+          align: "left",
+          field: (row) => row.local_mode,
+          format: (val) => `${val}`,
+          sortable: true
         }
       ]
 
@@ -288,7 +305,7 @@ export default {
           console.log("update device table")
         }
       }
-    , 5000)
+    , 8000)
 
     this.$store.commit("main/selectApplication", this.$route.params.id)
   },
@@ -424,6 +441,25 @@ export default {
       }
       this.devices.splice(realIndex, 1, res)
       this.loading = false
+    },
+
+    async getAllLocalMode() {
+      const deviceInDeveloper = this.devices.filter((elem) => elem.os_variant === "dev")
+
+      console.log("device in developer", deviceInDeveloper)
+
+      // extra check, avaiability of local mode
+      const deviceWithLocalMode = deviceInDeveloper.filter(async (elem) => {
+        await this.$store.state.main.sdk.models.device.getLocalModeSupport(elem.uuid).supported
+      })
+
+      // query local mode
+      this.localMode = deviceWithLocalMode.map(async (elem) => {
+        return {
+          uuid: elem.uuid,
+          status: await this.$store.state.main.sdk.models.device.isInLocalMode(elem.uuid)
+        }
+      })
     },
 
     async exposeSSL(props) {
