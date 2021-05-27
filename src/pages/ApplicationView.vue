@@ -185,6 +185,14 @@ export default {
           sortable: true
         },
         {
+          name: "cpu_usage",
+          label: this.$t("cpu_usage"),
+          align: "left",
+          field: (row) => row.cpu_usage,
+          format: (val) => `${val}` + "%",
+          sortable: true
+        },
+        {
           name: "ip_address",
           label: this.$t("ip"),
           align: "left",
@@ -201,11 +209,27 @@ export default {
           sortable: true
         },
         {
+          name: "is_web_accessible",
+          label: this.$t("is_web_accessible"),
+          align: "left",
+          field: (row) => row.is_web_accessible,
+          format: (val) => `${val}`,
+          sortable: true
+        },
+        {
           name: "os_version",
           label: this.$t("os_version"),
           align: "left",
           field: (row) => [row.os_version, row.os_variant],
           format: ([val1, val2]) => `${val1}` + "  " + `${val2}`,
+          sortable: true
+        },
+        {
+          name: "supervisor_version",
+          label: this.$t("supervisor_version"),
+          align: "left",
+          field: (row) => row.supervisor_version,
+          format: (val) => `${val}`,
           sortable: true
         },
         {
