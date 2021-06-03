@@ -60,8 +60,13 @@
                   </q-popup-edit>
                 </q-item-label>
 
-                <q-item-label class="q-pa-md" v-else-if="col.name === 'local_mode'">
-                    <q-toggle v-model=" " />
+                <q-item-label
+                  v-else-if="col.name === 'local_mode'" >
+                    <q-toggle
+                      :disabled="props.row.localMode === undefined || !props.row.is_online"
+                      v-model="props.row.localMode"
+                      @click="toggleLocalMode(props.row.uuid, props.row.localMode)"
+                    />
                 </q-item-label>
 
                 <!-- defalut case-->
@@ -172,7 +177,6 @@ export default {
       appConfigVars: [],
       deviceLoadingState: {},
       blockRefresh: false,
-      localMode: [], // array of obj {uuid, status}
       pagination: {
         rowsPerPage: 20
       },
@@ -197,7 +201,7 @@ export default {
           name: "cpu_usage",
           label: this.$t("cpu_usage"),
           align: "left",
-          field: (row) => row.cpu_usage,
+          field: (row) => (row.is_online === true) ? row.cpu_usage : 0,
           format: (val) => `${val}` + "%",
           sortable: true
         },
@@ -298,14 +302,13 @@ export default {
   },
   mounted() {
     this.loadApplicationDetails() // first load
-
     setInterval(() => {
         if (this.blockRefresh !== true) {
           this.loadApplicationDetails()
           console.log("update device table")
         }
       }
-    , 8000)
+    , 20000)
 
     this.$store.commit("main/selectApplication", this.$route.params.id)
   },
@@ -357,13 +360,15 @@ export default {
       const devices = await this.$store.state.main.sdk.models.device.getAllByApplication(
         this.$route.params.id
       )
-      console.log(devices)
+
+      // console.log(devices)
+
       if (this.$store.state.main.tunnelerUrl) {
         const tunnelerInformation = await this.$tunnelerClient.getConnectionsForApp(
           this.$route.params.id
         )
-        for (let index = 0; index < devices.length; index++) {
-          const device = devices[index]
+
+        for (const device in devices) {
           if (device.sshExposed === undefined) {
             device.sshExposed = false
           }
@@ -396,7 +401,10 @@ export default {
           }
         }
       }
-      this.devices = devices
+
+      this.devices = devices // copy local devices to the component devices
+
+      await this.getAllLocalMode() // manual query the server for find out the devices in local mode
     },
     async openDomain(details) {
       const prefix = details.ssl ? "https://" : "http://"
@@ -446,22 +454,38 @@ export default {
     async getAllLocalMode() {
       const deviceInDeveloper = this.devices.filter((elem) => elem.os_variant === "dev")
 
-      console.log("device in developer", deviceInDeveloper)
+      // console.log("device in developer", deviceInDeveloper)
 
-      // extra check, avaiability of local mode
+      // extra check, quesry for avaiability of local mode
       const deviceWithLocalMode = deviceInDeveloper.filter(async (elem) => {
         await this.$store.state.main.sdk.models.device.getLocalModeSupport(elem.uuid).supported
       })
 
-      // query local mode
-      this.localMode = deviceWithLocalMode.map(async (elem) => {
+      // query local mode status
+      const localMode = await Promise.all(deviceWithLocalMode.map(async (elem) => {
         return {
           uuid: elem.uuid,
           status: await this.$store.state.main.sdk.models.device.isInLocalMode(elem.uuid)
         }
-      })
+      }))
+
+      // add the attribute local mode to the array of devices.
+      // the attribute localMode will be use for a 3 state toggle button, where
+      // undefined make the button disabled. The states of the toggle are true, null, false
+      for (const device of this.devices) { // performance ?? compared to local copy ?
+        const deviceToInsert = localMode.find(element => element.uuid === device.uuid)
+console.log("deviceToInsert", deviceToInsert)
+        if (deviceToInsert === undefined) {
+          device.localMode = undefined
+        } else {
+          device.localMode = deviceToInsert.status
+        }
+      }
     },
 
+    async toggleLocalMode(uuid, oldValue) {
+
+    },
     async exposeSSL(props) {
       this.loading = true
       this.deviceLoadingState[props.row.uuid] = true
