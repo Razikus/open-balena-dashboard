@@ -75,7 +75,6 @@
       clearPopupText: function() { // @cancel -> function(value, initialValue)
         this.selectedApp.name = ""
       },
-
       async removeApp() {
         await this.$store.state.main.sdk.models.application.remove(this.selectedApp.slug)
         this.clearPopupText()
