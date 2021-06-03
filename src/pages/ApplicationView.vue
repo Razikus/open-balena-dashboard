@@ -63,10 +63,10 @@
                 <q-item-label
                   v-else-if="col.name === 'local_mode'" >
                     <q-toggle
-                      :disabled="props.row.localMode === undefined || !props.row.is_online"
+                      :hidden="props.row.localMode === undefined || !props.row.is_online"
                       v-model="props.row.localMode"
-                      @click="toggleLocalMode(props.row.uuid, props.row.localMode)"
-                    />
+                      @click="toggleLocalMode"
+                    />  <span>local {{props.row.localMode}}, online {{props.row.is_online}}</span>
                 </q-item-label>
 
                 <!-- defalut case-->
@@ -474,7 +474,7 @@ export default {
       // undefined make the button disabled. The states of the toggle are true, null, false
       for (const device of this.devices) { // performance ?? compared to local copy ?
         const deviceToInsert = localMode.find(element => element.uuid === device.uuid)
-console.log("deviceToInsert", deviceToInsert)
+ console.log("deviceToInsert", deviceToInsert)
         if (deviceToInsert === undefined) {
           device.localMode = undefined
         } else {
@@ -483,9 +483,23 @@ console.log("deviceToInsert", deviceToInsert)
       }
     },
 
-    async toggleLocalMode(uuid, oldValue) {
+    async toggleLocalMode(device) {
+      this.loading = true
+console.log("enter")
 
+      const newLocalModeValue = device.localMode // toggle already appened
+      device.localMode = null // intermediate toggle button state
+
+      if (newLocalModeValue === true) {
+        await this.$store.state.main.sdk.models.device.enableLocalMode(device.uuid)
+      } else {
+        await this.$store.state.main.sdk.models.device.disableLocalMode(device.uuid)
+      }
+console.log("exit")
+      device.localMode = newLocalModeValue
+      this.loading = false
     },
+
     async exposeSSL(props) {
       this.loading = true
       this.deviceLoadingState[props.row.uuid] = true
