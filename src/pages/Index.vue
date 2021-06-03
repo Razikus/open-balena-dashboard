@@ -8,16 +8,18 @@
     />
 
     <AddAppButton/>
+    <RemoveAppButton/>
   </q-page>
 </template>
 
 <script>
 import Application from 'components/Application.vue'
 import AddAppButton from 'components/AddAppButton.vue'
+import RemoveAppButton from 'components/RemoveAppButton.vue'
 
 export default {
   name: 'PageIndex',
-  components: { Application, AddAppButton },
+  components: { Application, AddAppButton, RemoveAppButton },
 
   data() {
     return {
