@@ -69,9 +69,11 @@ export default {
       device_type: {}, arch: '', image: ''
     }
   },
+
   mounted() {
     this.fetchData()
   },
+
   methods: {
     showDetails() {
       this.$router.push({ name: "application", params: { id: this.slug } })

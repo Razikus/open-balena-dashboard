@@ -29,7 +29,7 @@ export default function (/* { store, ssrContext } */) {
   return Router
 }
 
-// Modify the push method of vue-router
+// Modify the push method of vue-router for navigating to the current location
 
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location, onResolve, onReject) {

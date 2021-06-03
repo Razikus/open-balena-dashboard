@@ -52,5 +52,6 @@ export default {
   supervisor_version: "Supervisor Version",
   editDeviceEnv: "Edit envs",
   DeviceEnvVars: "Device env vars",
+  exportState: "Export State",
   delete: "Delete"
 }

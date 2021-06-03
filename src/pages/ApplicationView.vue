@@ -90,7 +90,7 @@
               {{ $t("editDeviceEnv") }}
             </q-btn>
             <q-btn @click="saveObj(props.row)" >
-              {{ $t("Export state")}}
+              {{ $t("exportState")}}
             </q-btn>
 <!--  dialog for changing app for a device
          <q-btn  v-if="props.row.is_online">
@@ -313,7 +313,7 @@ export default {
         }
       }
     , 20000)
-
+console.log("app version", this.$store.state.main.sdk.models.release.getAllByApplication("second"))
     this.$store.commit("main/selectApplication", this.$route.params.id)
   },
 
