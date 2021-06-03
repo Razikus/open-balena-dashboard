@@ -63,9 +63,9 @@
                 <q-item-label
                   v-else-if="col.name === 'local_mode'" >
                     <q-toggle
-                      :hidden="props.row.localMode === undefined || !props.row.is_online"
+                      :disable="(props.row.localMode === null) || !props.row.is_online"
                       v-model="props.row.localMode"
-                      @click="toggleLocalMode"
+                      @input="toggleLocalMode(props.row)"
                     />  <span>local {{props.row.localMode}}, online {{props.row.is_online}}</span>
                 </q-item-label>
 
@@ -475,12 +475,12 @@ export default {
 
       // add the attribute local mode to the array of devices.
       // the attribute localMode will be use for a 3 state toggle button, where
-      // undefined make the button disabled. The states of the toggle are true, null, false
+      // The states of the toggle are true, null, false
       for (const device of this.devices) { // performance ?? compared to local copy ?
         const deviceToInsert = localMode.find(element => element.uuid === device.uuid)
- console.log("deviceToInsert", deviceToInsert)
+// console.log("deviceToInsert", deviceToInsert)
         if (deviceToInsert === undefined) {
-          device.localMode = undefined
+          device.localMode = null
         } else {
           device.localMode = deviceToInsert.status
         }
@@ -489,7 +489,7 @@ export default {
 
     async toggleLocalMode(device) {
       this.loading = true
-console.log("enter")
+console.log("enter", device.uuid)
 
       const newLocalModeValue = device.localMode // toggle already appened
       device.localMode = null // intermediate toggle button state
@@ -589,7 +589,7 @@ console.log("exit")
       this.deviceLoadingState[props.row.uuid] = false
     },
 
-    async saveObj(device) {
+    saveObj(device) {
       const blob = new Blob([JSON.stringify(device, null, 2)], { type: "text/plain;charset=utf-8" })
       saveAs(blob, device.uuid + ".txt")
     }
