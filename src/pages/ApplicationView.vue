@@ -89,6 +89,9 @@
             <q-btn :to="'/deviceenvs/' + $route.params.id + '/' +  props.row.uuid">
               {{ $t("editDeviceEnv") }}
             </q-btn>
+            <q-btn @click="saveObj(props.row)" >
+              {{ $t("Export state")}}
+            </q-btn>
 <!--  dialog for changing app for a device
          <q-btn  v-if="props.row.is_online">
               {{ $t("switch application") }}
@@ -159,6 +162,7 @@
 <script>
 import Dot from "../components/Dot"
 import LogTerminal from "components/LogTerminal"
+import { saveAs } from 'file-saver'
 
 export default {
   components: { LogTerminal, Dot },
@@ -583,7 +587,13 @@ console.log("exit")
       }
       this.loading = false
       this.deviceLoadingState[props.row.uuid] = false
+    },
+
+    async saveObj(device) {
+      const blob = new Blob([JSON.stringify(device, null, 2)], { type: "text/plain;charset=utf-8" })
+      saveAs(blob, device.uuid + ".txt")
     }
+
   }
 }
 </script>
