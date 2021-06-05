@@ -24,7 +24,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     
-    - run: npm install
+    - run: npm ci
+    - run: npm install @quasar/cli -g
     - run: quasar build
       
     - name: Archive production artifacts
