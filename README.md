@@ -1,5 +1,5 @@
 # Open Balena Dashboard (open-balena-dashboard)
-
+[![Build artifact and publish](https://github.com/markFieldman/open-balena-dashboard/actions/workflows/build_artifact.yml/badge.svg?branch=master)](https://github.com/markFieldman/open-balena-dashboard/actions/workflows/build_artifact.yml)
 Dashboard for Open Balena.
 
 Check it out here
