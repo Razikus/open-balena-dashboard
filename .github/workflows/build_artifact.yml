@@ -1,0 +1,36 @@
+name: Build artifact and publish
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Setup Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+
+    - name: Cache dependencies
+      uses: actions/cache@v1
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    
+    - run: npm ci 
+    - run: quasar build
+      
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: frontend-artifacts
+        path: |
+          dist
+          !dist/**/*.md
