@@ -1,50 +1,77 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="hHh Lpr lff">
     <q-header elevated>
       <q-toolbar v-if="$store.state.main.loggedIn">
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="leftDrawerOpen = !leftDrawerOpen"
-        />
-
         <q-toolbar-title>
-          Open Balena
+          <div class="row">
+            <div class="col">
+              <q-img
+                src="openbalena_logo.png"
+                spinner-color="white"
+                class=""
+                style="max-width: 150px; filter: invert(1);"
+              />
+            </div>
+            <div v-if="$store.state.main.selectedApplication" class="col">
+              <q-badge  style="font-size: 15px;" outline color="green">
+                {{$store.state.main.selectedApplication}}
+              </q-badge>
+              <q-badge  v-if="$store.state.main.selectedDevice" style="font-size: 15px;" outline color="yellow">
+               {{$store.state.main.selectedDevice}}
+              </q-badge>
+            </div>
+          </div>
         </q-toolbar-title>
-
+        <q-select
+          v-model="lang"
+          :options="langOptions"
+          dense
+          color="white"
+          dark
+          borderless
+          emit-value
+          map-options
+          options-dense
+          style="min-width: 150px"
+        >
+          <template v-slot:prepend>
+          <q-icon color="white" name="language" />
+        </template>
+        </q-select>
+        <q-btn flat round dense icon="dark_mode" @click="switchTheme" />
+        <q-btn flat round dense icon="logout" @click="logout" />
       </q-toolbar>
     </q-header>
 
     <q-drawer
       v-model="leftDrawerOpen"
       bordered
-      content-class="bg-grey-1"
+      show-if-above
+      @mouseover="miniState = false"
+      @mouseout="miniState = true"
+      mini-to-overlay
+      :mini="miniState"
     >
-      <q-list v-if="$store.state.main.loggedIn"> 
+      <q-list v-if="$store.state.main.loggedIn">
         <q-item-label
           header
-          class="text-grey-8"
         >
           {{ $t('links') }}
         </q-item-label>
-        <EssentialLink 
+        <EssentialLink
           v-for="link in essentialLinks"
           :key="link.title"
           v-bind="link"
         />
         <q-separator/>
       </q-list>
-      <q-list v-if="$store.state.main.selectedApplication"> 
+      <q-list v-if="$store.state.main.selectedApplication">
         <q-item-label
           header
-          class="text-grey-8"
         >
-          {{ $t('selectedApplication') }} {{ $store.state.main.selectedApplication }}
+          {{ $store.state.main.selectedApplication }}
         </q-item-label>
-        <EssentialLink 
+        <EssentialLink
           v-for="link in appLinks"
           :key="link.title"
           v-bind="link"
@@ -74,15 +101,21 @@ const linksData = [
 export default {
   name: 'MainLayout',
   components: { EssentialLink },
+  watch: {
+    lang(lang) {
+      this.$i18n.locale = lang
+    }
+  },
   data () {
     return {
       leftDrawerOpen: false,
+      miniState: true,
       essentialLinks: linksData,
       appLinks: [
         {
           title: 'Devices',
           caption: 'devicescaption',
-          icon: 'cloud',
+          icon: 'apps',
           link: 'application',
           param: () => {
             return { id: this.$store.state.main.selectedApplication }
@@ -97,7 +130,21 @@ export default {
             return { id: this.$store.state.main.selectedApplication }
           }
         }
+      ],
+      lang: this.$i18n.locale,
+      langOptions: [
+        { value: 'en-us', label: 'English' },
+        { value: 'ru-RU', label: 'Русский' }
       ]
+    }
+  },
+  methods: {
+    switchTheme() {
+      this.$q.dark.toggle()
+    },
+    logout() {
+      delete window.localStorage.sessionToken
+      location.reload()
     }
   }
 }

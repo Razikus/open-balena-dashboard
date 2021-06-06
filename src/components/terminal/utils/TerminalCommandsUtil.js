@@ -69,7 +69,11 @@ class TerminalCommandsUtil {
       const servicesObj = {}
       Object.keys(dev.current_services).forEach(key => {
         const service = dev.current_services[key].filter(s => s.status.includes("Running"))[0]
-        servicesObj[service.service_id] = key
+        try {
+          servicesObj[service.service_id] = key
+        } catch (e) {
+          servicesObj.SYSTEM = key
+        }
       })
       return servicesObj
     })
@@ -80,13 +84,13 @@ class TerminalCommandsUtil {
   }
 
   formatSingleMessage(services, message) {
-      if (message.isSystem) {
-        return `<b style="color: white;">[SYSTEM]</b> [${this.formatDate(message.createdAt)}] ${message.message}`
-      }
-      if (message.isStdErr) {
-        return `<b style="color: red;">[ERROR]</b> <span style="color: red"> [${this.formatDate(message.createdAt)}] ${message.message}</span>`
-      }
-      return `<b style="color: ${this.colors[Object.keys(services).indexOf("" + message.serviceId)]};">[${services[message.serviceId]}]</b> [${this.formatDate(message.createdAt)}] ${message.message}`
+    if (message.isSystem) {
+      return `<b style="color: blue;">[SYSTEM]</b> [${this.formatDate(message.createdAt)}] ${message.message}`
+    }
+    if (message.isStdErr) {
+      return `<b style="color: red;">[ERROR]</b> <span style="color: red"> [${this.formatDate(message.createdAt)}] ${message.message}</span>`
+    }
+    return `<b style="color: ${this.colors[Object.keys(services).indexOf("" + message.serviceId)]};">[${services[message.serviceId]}]</b> [${this.formatDate(message.createdAt)}] ${message.message}`
   }
 
   formatMessageAsPromise(message) {

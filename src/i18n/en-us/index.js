@@ -8,7 +8,12 @@ export default {
   links: "Essential Links",
   logs: "Logs terminal",
   name: "Name",
+  type: "Type",
+  clipboard: "Copied to clipboard!",
   value: "Value",
+  hostVer: "OS version",
+  supervisor_version: "Supervisor version",
+  is_running_release: "Release version",
   online: "Online/VPN Connected",
   ip: "IP Address",
   note: "Note",
@@ -24,8 +29,11 @@ export default {
   editname: "Edit name",
   selectedApplication: "Selected application",
   Devices: "Devices",
+  Device: "Device",
+  'double-click': 'Click twice for edit',
   homecaption: "Application selector",
   Home: "Home",
+  details: "Details",
   devicescaption: "Devices status",
   Env: "Environment",
   envcaption: "Environment settings",
@@ -46,5 +54,6 @@ export default {
   mac_address: "Mac addresses",
   editDeviceEnv: "Edit envs",
   DeviceEnvVars: "Device env vars (higher priority than application envs)",
-  delete: "Delete"
+  delete: "Delete",
+  login: "Login"
 }

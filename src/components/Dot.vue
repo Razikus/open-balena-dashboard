@@ -1,12 +1,11 @@
 <template>
-  <span class="dot" :style="'background-color: ' + color"></span>
+  <q-badge  class="dot" rounded :color="color" />
 </template>
 
 <style scoped>
 .dot {
-  height: 25px;
-  width: 25px;
-  background-color: green;
+  height: 15px;
+  width: 15px;
   border-radius: 50%;
   display: inline-block;
 }
