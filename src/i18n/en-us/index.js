@@ -4,6 +4,7 @@
 export default {
   failed: 'Action failed',
   success: 'Action was successful',
+
   home: "Home",
   links: "Essential Links",
   logs: "Logs terminal",
@@ -14,9 +15,11 @@ export default {
   note: "Note",
   overall: "Overall status / progress",
   notloaded: "Not loaded",
+
   link: "Open Balena link",
   password: "Password",
   email: "E-mail",
+  
   reboot: "Reboot",
   restart: "Restart",
   nonote: "No notes",
@@ -55,5 +58,8 @@ export default {
   exportState: "Export State",
   organization: "Organization",
   delete: "Delete",
-  versioncaption: "Version history"
+  versioncaption: "Version history",
+
+  switch_application: "Switch app",
+  switch_app_name: "Select the destination application"
 }

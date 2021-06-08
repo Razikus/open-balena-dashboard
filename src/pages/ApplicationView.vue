@@ -92,20 +92,29 @@
             <q-btn @click="saveObj(props.row)" >
               {{ $t("exportState")}}
             </q-btn>
-<!--  dialog for changing app for a device
-         <q-btn  v-if="props.row.is_online">
-              {{ $t("switch application") }}
+
+            <!--  dialog for changing app for a device -->
+            <!-- <q-btn v-if="props.row.is_online">
+              {{ $t("switch_application") }}
               <q-popup-edit
+                :title="$t('switch_app_name')"
                 buttons
-                @save="switchApp(props)"
-                :title="$t('new app name')"
+                @save="switchApp(props.row.uuid, this.switchAppTo)"
+                @hide="clearSwitchAppTo"
               >
-                <q-input dense autofocus counter/>
+                <q-input v-model="this.switchAppTo" dense autofocus counter/>
               </q-popup-edit>
+            </q-btn> -->
+
+            <!-- popup dialog at the bottom -->
+            <q-btn v-if="props.row.is_online" @click="switchAppPopUp = true">
+              {{ $t("switch_application") }}
             </q-btn>
-  -->
+
           </q-card-section>
+
           <q-separator/>
+
           <q-card-section v-if="$store.state.main.tunnelerUrl">
             <q-toggle
               v-model="props.row.sshExposed"
@@ -156,6 +165,42 @@
         </q-card>
       </template>
     </q-table>
+
+    <q-dialog v-model="switchAppPopUp" @before-show="loadAppsForSwitch" @hide="clearSwitchAppTo">
+      <q-card style="width: 700px; max-width: 80vw;">
+        <q-card-section>
+          <div class="text-h6">Select the application to switch to</div>
+        </q-card-section>
+
+        <q-card-section>
+            <q-select
+              filled
+              v-model="this.switchAppTo"
+              use-input
+              input-debounce="0"
+              label="Apps"
+              :options="options"
+              @filter="filterFn"
+              behavior="menu"
+              style="font-size: large;"
+            >
+              <template v-slot:no-option>
+                <q-item>
+                  <q-item-section class="text-grey">
+                    No results
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Close" color="primary" v-close-popup />
+          <q-btn flat label="Remove" color="primary" v-close-popup @click="switchApp(props.row.uuid, this.switchAppTo)"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -177,10 +222,18 @@ export default {
       history: this.$t("notloaded"),
       dialog: false,
       currLogs: null,
+
       appEnvVars: [],
       appConfigVars: [],
+
       deviceLoadingState: {},
       blockRefresh: false,
+
+      switchAppPopUp: false,
+      switchAppTo: "",
+      appList: [],
+      options: [], // filtered options of the select menu
+
       pagination: {
         rowsPerPage: 20
       },
@@ -313,7 +366,7 @@ export default {
         }
       }
     , 20000)
-console.log("app version", this.$store.state.main.sdk.models.release.getAllByApplication("second"))
+
     this.$store.commit("main/selectApplication", this.$route.params.id)
   },
 
@@ -354,11 +407,36 @@ console.log("app version", this.$store.state.main.sdk.models.release.getAllByApp
       )
       this.loading = false
     },
-  //   async switchApp(what) {
-  //     this.loading = true
-  // //    await this.$store.state.main.sdk.models.device.move(what.row.uuid, )
-  //     this.loading = false
-  //   },
+
+    // functions for the switch of a device in a new app
+    clearSwitchAppTo() {
+      this.switchAppTo = ""
+    },
+    async switchApp(uuid, newApp) {
+      this.loading = true
+      await this.$store.state.main.sdk.models.device.move(uuid, newApp)
+      this.loading = false
+    },
+    filterFn (val, update) {
+      if (val === '') {
+        update(() => {
+          this.options = this.appList
+        })
+        return
+      }
+
+      update(() => {
+        const needle = val.toLowerCase()
+        this.options = this.appList.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      })
+    },
+
+    async loadAppsForSwitch () {
+      const apps = await this.$store.state.main.sdk.models.application.getAll()
+
+      this.appList = apps.map(element => element.slug)
+      this.options = this.appList
+    },
 
     async loadApplicationDetails() {
       const devices = await this.$store.state.main.sdk.models.device.getAllByApplication(
@@ -455,6 +533,7 @@ console.log("app version", this.$store.state.main.sdk.models.release.getAllByApp
       this.loading = false
     },
 
+    // functions for handling device local mode
     async getAllLocalMode() {
       const deviceInDeveloper = this.devices.filter((elem) => elem.os_variant === "dev")
 
@@ -478,7 +557,6 @@ console.log("app version", this.$store.state.main.sdk.models.release.getAllByApp
       // The states of the toggle are true, null, false
       for (const device of this.devices) { // performance ?? compared to local copy ?
         const deviceToInsert = localMode.find(element => element.uuid === device.uuid)
-// console.log("deviceToInsert", deviceToInsert)
         if (deviceToInsert === undefined) {
           device.localMode = null
         } else {
