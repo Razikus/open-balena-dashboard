@@ -24,7 +24,7 @@
           />
         </q-card-section>
         <q-card-section>
-          <q-input v-model="newApp.organization" :label="$t('Organization')" type="text"
+          <q-input v-model="newApp.organization" :label="$t('organization')" type="text"
             style="font-size: large;" dense
           />
         </q-card-section>

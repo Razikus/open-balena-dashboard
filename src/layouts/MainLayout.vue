@@ -37,6 +37,7 @@
         />
         <q-separator/>
       </q-list>
+
       <q-list v-if="$store.state.main.selectedApplication">
         <q-item-label
           header
@@ -90,15 +91,15 @@ export default {
             return { id: this.$store.state.main.selectedApplication }
           }
         },
-        // {
-        //   title: 'Versions',
-        //   caption: '',
-        //   icon: 'update',
-        //   link: '',
-        //   param: () => {
-        //     return { id: this.$store.state.main.selectedApplication }
-        //   }
-        // },
+        {
+          title: 'Versions',
+          caption: 'versioncaption',
+          icon: 'update',
+          link: 'history',
+          param: () => {
+            return { id: this.$store.state.main.selectedApplication }
+          }
+        },
         {
           title: 'Env',
           caption: 'envcaption',

@@ -53,5 +53,7 @@ export default {
   editDeviceEnv: "Edit envs",
   DeviceEnvVars: "Device env vars",
   exportState: "Export State",
-  delete: "Delete"
+  organization: "Organization",
+  delete: "Delete",
+  versioncaption: "Version history"
 }
