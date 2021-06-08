@@ -28,6 +28,9 @@ export default {
   },
 
   mounted() {
+    // if you click home clear the previously selected app
+    this.$store.state.main.selectedApplication = undefined
+
     this.loadApplications()
   },
 
