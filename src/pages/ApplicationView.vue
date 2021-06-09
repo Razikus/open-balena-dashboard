@@ -93,19 +93,6 @@
               {{ $t("exportState")}}
             </q-btn>
 
-            <!--  dialog for changing app for a device -->
-            <!-- <q-btn v-if="props.row.is_online">
-              {{ $t("switch_application") }}
-              <q-popup-edit
-                :title="$t('switch_app_name')"
-                buttons
-                @save="switchApp(props.row.uuid, this.switchAppTo)"
-                @hide="clearSwitchAppTo"
-              >
-                <q-input v-model="this.switchAppTo" dense autofocus counter/>
-              </q-popup-edit>
-            </q-btn> -->
-
             <!-- popup dialog at the bottom -->
             <q-btn v-if="props.row.is_online" @click="switchAppPopUp = true">
               {{ $t("switch_application") }}
@@ -430,7 +417,6 @@ export default {
         this.options = this.appList.filter(v => v.toLowerCase().indexOf(needle) > -1)
       })
     },
-
     async loadAppsForSwitch () {
       const apps = await this.$store.state.main.sdk.models.application.getAll()
 
@@ -449,6 +435,8 @@ export default {
         const tunnelerInformation = await this.$tunnelerClient.getConnectionsForApp(
           this.$route.params.id
         )
+
+        console.log(tunnelerInformation)
 
         for (const device in devices) {
           if (device.sshExposed === undefined) {
@@ -483,6 +471,7 @@ export default {
           }
         }
       }
+      console.log("HERE")
 
       this.devices = devices // copy local devices to the component devices
 
