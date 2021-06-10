@@ -19,7 +19,7 @@ export default {
   link: "Open Balena link",
   password: "Password",
   email: "E-mail",
-  
+
   reboot: "Reboot",
   restart: "Restart",
   nonote: "No notes",
@@ -50,6 +50,7 @@ export default {
   mac_address: "Mac addresses",
   os_version: "OS version",
   cpu_usage: "CPU usage",
+  memory_usage: "Memory usage",
   is_web_accessible: "Accessible from web",
   local_mode: "Local Mode",
   supervisor_version: "Supervisor Version",

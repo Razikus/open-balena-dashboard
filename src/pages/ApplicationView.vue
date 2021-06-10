@@ -245,8 +245,21 @@ export default {
           name: "cpu_usage",
           label: this.$t("cpu_usage"),
           align: "left",
-          field: (row) => (row.is_online === true) ? row.cpu_usage : 0,
-          format: (val) => `${val}` + "%",
+          field: (row) => (row.is_online === true) ? [row.cpu_usage, row.cpu_temp] : [null, null],
+          format: ([usage, temp]) => `${usage}` + "%  (" + `${temp}` + "°C)",
+          sortable: true
+        },
+        {
+          name: "memory_usage",
+          label: this.$t("memory_usage"),
+          align: "left",
+          field: (row) => [
+            (100 * row.memory_usage / row.memory_total).toFixed(2),
+            row.memory_usage,
+            row.memory_total
+          ],
+          format: ([percentage, usage, total]) =>
+            `${percentage}` + "%   " + `${usage}` + "MB / " + `${total}` + "MB",
           sortable: true
         },
         {
