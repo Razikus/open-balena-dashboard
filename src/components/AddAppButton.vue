@@ -132,6 +132,8 @@ const NAME = ["AIO 3288C   armv7hf", "CTI Astro TX2 G+ (NEW)   aarch64", "Asus T
         )
 
         this.clearPopupText()
+
+        // need to add trigger update in the parent component
       },
 
       filterFn (val, update) {

@@ -7,6 +7,7 @@
           <th class="text-left">commit</th>
           <th class="text-left">created at</th>
           <th class="text-left">status</th>
+          <th class="text-left">size</th>
         </tr>
       </thead>
 
@@ -16,6 +17,7 @@
           <td>{{app.commit}}</td>
           <td>{{app.created_at}}</td>
           <td>{{app.status}}</td>
+          <td>{{app.size}}</td>
         </tr>
       </tbody>
     </q-markup-table>
@@ -43,6 +45,21 @@ export default {
   methods: {
     async fetchData() {
       this.applicationList = await this.$store.state.main.sdk.models.release.getAllByApplication(this.slug)
+
+      const appIDs = this.applicationList.map(elem => {
+        return elem.id
+      })
+
+// trying to pull image size from the registry
+      await appIDs.forEach(async (elem, index) => {
+        const temp = await this.$store.state.main.sdk.models.image.get(elem)
+
+        if (temp === undefined) {
+          this.applicationList[index].size = null
+        } else {
+          this.applicationList[index].size = temp.image_size
+        }
+      })
     }
   }
 }
