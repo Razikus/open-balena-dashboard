@@ -14,62 +14,94 @@
       <template v-slot:item="props">
         <q-card class="col-xl-3 col-md-4 col-sm-12 col-xs-12">
           <q-list dense>
-            <q-item v-for="col in props.cols" :key="col.name">
-              <q-item-section>
+            <q-item v-for="col in props.cols" :key="col.name"> <!-- !! render rows + conditional rendering !! -->
+
+              <!-- Left side of the card -->
+              <q-item-section> <!-- default case-->
                 <q-item-label>{{ col.label }}</q-item-label>
               </q-item-section>
+
+              <!-- Right side of the card-->
               <q-item-section side>
-                <q-item-label v-if="col.name == 'is_online'">
+                <q-item-label v-if="col.name === 'is_online'">
                   <Dot color="green" v-if="props.row.is_online"></Dot>
                   <Dot color="red" v-else></Dot>
-                  /
+                  <span style=" font-size: 25px; ">/</span>
                   <Dot color="green" v-if="props.row.is_connected_to_vpn"></Dot>
                   <Dot color="red" v-else></Dot>
                 </q-item-label>
-                <q-item-label v-else-if="col.name == 'device_name'">
+
+                <q-item-label v-else-if="col.name === 'device_name'">
                   {{ col.value }}
                   <q-popup-edit
                     v-model="props.row.device_name"
                     buttons
+                    @before-show="preventRefresh"
                     @save="saveDeviceName(props)"
+                    @hide="allowRefresh"
                     :title="$t('editname')"
                   >
                     <q-input v-model="props.row.device_name" dense autofocus counter/>
                   </q-popup-edit>
                 </q-item-label>
-                <q-item-label v-else-if="col.name == 'note'">
-                  <span v-if="props.row.note !== null"> {{ col.value }}</span>
+
+                <q-item-label v-else-if="col.name === 'note'">
+                  <span v-if="props.row.note !== null && props.row.note !== '' "> {{ col.value }}</span>
                   <span v-else>{{ $t("nonote") }}</span>
                   <q-popup-edit
                     v-model="props.row.note"
                     buttons
+                    @before-show="preventRefresh"
                     @save="saveNote(props)"
+                    @hide="allowRefresh"
                     :title="$t('editnotes')"
                   >
                     <q-input v-model="props.row.note" dense autofocus counter/>
                   </q-popup-edit>
                 </q-item-label>
+
+                <q-item-label
+                  v-else-if="col.name === 'local_mode'" >
+                    <q-toggle
+                      :disable="(props.row.localMode === null) || !props.row.is_online"
+                      v-model="props.row.localMode"
+                      @input="toggleLocalMode(props.row)"
+                    />  <span>local {{props.row.localMode}}, online {{props.row.is_online}}</span>
+                </q-item-label>
+
+                <!-- defalut case-->
                 <q-item-label v-else>{{ col.value }}</q-item-label>
+
               </q-item-section>
             </q-item>
           </q-list>
+
           <q-separator/>
+
           <q-card-section>
             <q-btn @click="showLog(props.row.uuid)">{{ $t("logs") }}</q-btn>
-            <q-btn @click="reboot(props)" v-if="props.row.is_online">{{
-                $t("reboot")
-              }}
+            <q-btn @click="reboot(props)" v-if="props.row.is_online">
+              {{ $t("reboot") }}
             </q-btn>
-            <q-btn @click="restart(props)" v-if="props.row.is_online">{{
-                $t("restart")
-              }}
+            <q-btn @click="restart(props)" v-if="props.row.is_online">
+              {{ $t("restart") }}
             </q-btn>
-            <q-btn :to="'/deviceenvs/' + $route.params.id + '/' +  props.row.uuid">{{
-                $t("editDeviceEnv")
-              }}
+            <q-btn :to="'/deviceenvs/' + $route.params.id + '/' +  props.row.uuid">
+              {{ $t("editDeviceEnv") }}
             </q-btn>
+            <q-btn @click="saveObj(props.row)" >
+              {{ $t("exportState")}}
+            </q-btn>
+
+            <!-- popup dialog at the bottom -->
+            <q-btn v-if="props.row.is_online" @click="switchAppPopUp = true">
+              {{ $t("switch_application") }}
+            </q-btn>
+
           </q-card-section>
+
           <q-separator/>
+
           <q-card-section v-if="$store.state.main.tunnelerUrl">
             <q-toggle
               v-model="props.row.sshExposed"
@@ -120,11 +152,49 @@
         </q-card>
       </template>
     </q-table>
+
+    <q-dialog v-model="switchAppPopUp" @before-show="loadAppsForSwitch" @hide="clearSwitchAppTo">
+      <q-card style="width: 700px; max-width: 80vw;">
+        <q-card-section>
+          <div class="text-h6">Select the application to switch to</div>
+        </q-card-section>
+
+        <q-card-section>
+            <q-select
+              filled
+              v-model="this.switchAppTo"
+              use-input
+              input-debounce="0"
+              label="Apps"
+              :options="options"
+              @filter="filterFn"
+              behavior="menu"
+              style="font-size: large;"
+            >
+              <template v-slot:no-option>
+                <q-item>
+                  <q-item-section class="text-grey">
+                    No results
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Close" color="primary" v-close-popup />
+          <q-btn flat label="Remove" color="primary" v-close-popup @click="switchApp(props.row.uuid, this.switchAppTo)"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
+
 <script>
 import Dot from "../components/Dot"
 import LogTerminal from "components/LogTerminal"
+import { saveAs } from 'file-saver'
 
 export default {
   components: { LogTerminal, Dot },
@@ -139,9 +209,18 @@ export default {
       history: this.$t("notloaded"),
       dialog: false,
       currLogs: null,
+
       appEnvVars: [],
       appConfigVars: [],
+
       deviceLoadingState: {},
+      blockRefresh: false,
+
+      switchAppPopUp: false,
+      switchAppTo: "",
+      appList: [],
+      options: [], // filtered options of the select menu
+
       pagination: {
         rowsPerPage: 20
       },
@@ -163,6 +242,27 @@ export default {
           sortable: true
         },
         {
+          name: "cpu_usage",
+          label: this.$t("cpu_usage"),
+          align: "left",
+          field: (row) => (row.is_online === true) ? [row.cpu_usage, row.cpu_temp] : [null, null],
+          format: ([usage, temp]) => `${usage}` + "%  (" + `${temp}` + "°C)",
+          sortable: true
+        },
+        {
+          name: "memory_usage",
+          label: this.$t("memory_usage"),
+          align: "left",
+          field: (row) => [
+            (100 * row.memory_usage / row.memory_total).toFixed(2),
+            row.memory_usage,
+            row.memory_total
+          ],
+          format: ([percentage, usage, total]) =>
+            `${percentage}` + "%   " + `${usage}` + "MB / " + `${total}` + "MB",
+          sortable: true
+        },
+        {
           name: "ip_address",
           label: this.$t("ip"),
           align: "left",
@@ -175,6 +275,30 @@ export default {
           label: this.$t("mac_address"),
           align: "left",
           field: (row) => row.mac_address,
+          format: (val) => `${val}`,
+          sortable: true
+        },
+        {
+          name: "is_web_accessible",
+          label: this.$t("is_web_accessible"),
+          align: "left",
+          field: (row) => row.is_web_accessible,
+          format: (val) => `${val}`,
+          sortable: true
+        },
+        {
+          name: "os_version",
+          label: this.$t("os_version"),
+          align: "left",
+          field: (row) => [row.os_version, row.os_variant],
+          format: ([val1, val2]) => `${val1}` + "  " + `${val2}`,
+          sortable: true
+        },
+        {
+          name: "supervisor_version",
+          label: this.$t("supervisor_version"),
+          align: "left",
+          field: (row) => row.supervisor_version,
           format: (val) => `${val}`,
           sortable: true
         },
@@ -220,16 +344,39 @@ export default {
           field: (row) => row.created_at,
           format: (val) => `${new Date(val).toLocaleString()}`,
           sortable: true
+        },
+        {
+          name: "local_mode",
+          label: this.$t("local_mode"),
+          align: "left",
+          field: (row) => row.local_mode,
+          format: (val) => `${val}`,
+          sortable: true
         }
       ]
+
     }
   },
   mounted() {
-    this.loadApplicationDetails()
-    setInterval(this.loadApplicationDetails, 5000)
+    this.loadApplicationDetails() // first load
+    setInterval(() => {
+        if (this.blockRefresh !== true) {
+          this.loadApplicationDetails()
+          console.log("update device table")
+        }
+      }
+    , 20000)
+
     this.$store.commit("main/selectApplication", this.$route.params.id)
   },
+
   methods: {
+    allowRefresh() {
+      this.blockRefresh = false
+    },
+    preventRefresh() {
+      this.blockRefresh = true
+    },
     async saveNote(what) {
       this.loading = true
       await this.$store.state.main.sdk.models.device.note(what.row.uuid, what.row.note)
@@ -247,6 +394,11 @@ export default {
       await this.$store.state.main.sdk.models.device.reboot(what.row.uuid)
       this.loading = false
     },
+    async restart(what) {
+      this.loading = true
+      await this.$store.state.main.sdk.models.device.restartApplication(what.row.uuid)
+      this.loading = false
+    },
     async saveDeviceName(what) {
       this.loading = true
       await this.$store.state.main.sdk.models.device.rename(
@@ -255,22 +407,51 @@ export default {
       )
       this.loading = false
     },
-    async restart(what) {
+
+    // functions for the switch of a device in a new app
+    clearSwitchAppTo() {
+      this.switchAppTo = ""
+    },
+    async switchApp(uuid, newApp) {
       this.loading = true
-      await this.$store.state.main.sdk.models.device.restartApplication(what.row.uuid)
+      await this.$store.state.main.sdk.models.device.move(uuid, newApp)
       this.loading = false
     },
+    filterFn (val, update) {
+      if (val === '') {
+        update(() => {
+          this.options = this.appList
+        })
+        return
+      }
+
+      update(() => {
+        const needle = val.toLowerCase()
+        this.options = this.appList.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      })
+    },
+    async loadAppsForSwitch () {
+      const apps = await this.$store.state.main.sdk.models.application.getAll()
+
+      this.appList = apps.map(element => element.slug)
+      this.options = this.appList
+    },
+
     async loadApplicationDetails() {
       const devices = await this.$store.state.main.sdk.models.device.getAllByApplication(
         this.$route.params.id
       )
-      console.log(devices)
+
+      // console.log(devices)
+
       if (this.$store.state.main.tunnelerUrl) {
         const tunnelerInformation = await this.$tunnelerClient.getConnectionsForApp(
           this.$route.params.id
         )
-        for (let index = 0; index < devices.length; index++) {
-          const device = devices[index]
+
+        console.log(tunnelerInformation)
+
+        for (const device in devices) {
           if (device.sshExposed === undefined) {
             device.sshExposed = false
           }
@@ -303,7 +484,11 @@ export default {
           }
         }
       }
-      this.devices = devices
+      console.log("HERE")
+
+      this.devices = devices // copy local devices to the component devices
+
+      await this.getAllLocalMode() // manual query the server for find out the devices in local mode
     },
     async openDomain(details) {
       const prefix = details.ssl ? "https://" : "http://"
@@ -347,6 +532,55 @@ export default {
         }
       }
       this.devices.splice(realIndex, 1, res)
+      this.loading = false
+    },
+
+    // functions for handling device local mode
+    async getAllLocalMode() {
+      const deviceInDeveloper = this.devices.filter((elem) => elem.os_variant === "dev")
+
+      // console.log("device in developer", deviceInDeveloper)
+
+      // extra check, quesry for avaiability of local mode
+      const deviceWithLocalMode = deviceInDeveloper.filter(async (elem) => {
+        await this.$store.state.main.sdk.models.device.getLocalModeSupport(elem.uuid).supported
+      })
+
+      // query local mode status
+      const localMode = await Promise.all(deviceWithLocalMode.map(async (elem) => {
+        return {
+          uuid: elem.uuid,
+          status: await this.$store.state.main.sdk.models.device.isInLocalMode(elem.uuid)
+        }
+      }))
+
+      // add the attribute local mode to the array of devices.
+      // the attribute localMode will be use for a 3 state toggle button, where
+      // The states of the toggle are true, null, false
+      for (const device of this.devices) { // performance ?? compared to local copy ?
+        const deviceToInsert = localMode.find(element => element.uuid === device.uuid)
+        if (deviceToInsert === undefined) {
+          device.localMode = null
+        } else {
+          device.localMode = deviceToInsert.status
+        }
+      }
+    },
+
+    async toggleLocalMode(device) {
+      this.loading = true
+console.log("enter", device.uuid)
+
+      const newLocalModeValue = device.localMode // toggle already appened
+      device.localMode = null // intermediate toggle button state
+
+      if (newLocalModeValue === true) {
+        await this.$store.state.main.sdk.models.device.enableLocalMode(device.uuid)
+      } else {
+        await this.$store.state.main.sdk.models.device.disableLocalMode(device.uuid)
+      }
+console.log("exit")
+      device.localMode = newLocalModeValue
       this.loading = false
     },
 
@@ -433,7 +667,13 @@ export default {
       }
       this.loading = false
       this.deviceLoadingState[props.row.uuid] = false
+    },
+
+    saveObj(device) {
+      const blob = new Blob([JSON.stringify(device, null, 2)], { type: "text/plain;charset=utf-8" })
+      saveAs(blob, device.uuid + ".txt")
     }
+
   }
 }
 </script>

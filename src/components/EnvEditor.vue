@@ -1,11 +1,54 @@
 <template>
 <div>
+  <p>Warning broken SDK</p>
   <q-table
-    grid
-    :data="currentEnvs"
+    :data="appConfigVars"
     :columns="columns"
     :loading="loading || parentLoading"
-    :title="$t('EnvVars')"
+    :title="$t('ConfigVars for application (broken)')"
+  >
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td key="Name" :props="props">
+            {{ props.row.name }}
+          </q-td>
+
+          <q-td key="Value" :props="props">
+            {{ props.row.value }}
+            <q-popup-edit v-model="props.row.value" @save="updateConfig(props)">
+              <q-input v-model="props.row.value" dense counter />
+            </q-popup-edit>
+          </q-td>
+
+          <q-td key="Action" :props="props">
+            <q-btn @click="deleteConfig(props)">Delete</q-btn>
+
+          </q-td>
+        </q-tr>
+      </template>
+
+      <template v-slot:bottom-row>
+        <q-tr>
+          <q-td>
+            <q-input filled v-model="newConfig.name" :label="$t('name')" />
+          </q-td>
+
+          <q-td key="Value">
+            <q-input filled v-model="newConfig.value" :label="$t('value')" />
+          </q-td>
+          <q-td key="Action">
+            <q-btn @click="saveConfig">Save</q-btn>
+          </q-td>
+        </q-tr>
+      </template>
+
+  </q-table>
+
+  <q-table
+    :data="appEnvVars"
+    :columns="columns"
+    :loading="loading || parentLoading"
+    :title="$t('EnvVars for application')"
   >
       <template v-slot:body="props">
         <q-tr :props="props">
@@ -16,7 +59,7 @@
           <q-td key="Value" :props="props">
             {{ props.row.value }}
             <q-popup-edit v-model="props.row.value" @save="updateEnv(props)">
-              <q-input v-model="props.row.value" dense autofocus counter />
+              <q-input v-model="props.row.value" dense counter />
             </q-popup-edit>
 
             </q-td>
@@ -43,11 +86,12 @@
       </template>
 
   </q-table>
+
   <q-table
-    :data="appConfigVars"
+    :data="appBuildVars"
     :columns="columns"
     :loading="loading || parentLoading"
-    :title="$t('ConfigVars')"
+    :title="$t('BuildVars for application')"
   >
       <template v-slot:body="props">
         <q-tr :props="props">
@@ -57,13 +101,13 @@
 
           <q-td key="Value" :props="props">
             {{ props.row.value }}
-            <q-popup-edit v-model="props.row.value" @save="updateConfig(props)">
-              <q-input v-model="props.row.value" dense autofocus counter />
+            <q-popup-edit v-model="props.row.value" @save="updateBuild(props)">
+              <q-input v-model="props.row.value" dense counter />
             </q-popup-edit>
 
             </q-td>
           <q-td key="Action" :props="props">
-            <q-btn @click="deleteConfig(props)">Delete</q-btn>
+            <q-btn @click="deleteBuild(props)">Delete</q-btn>
 
           </q-td>
         </q-tr>
@@ -72,19 +116,20 @@
       <template v-slot:bottom-row>
         <q-tr>
           <q-td>
-            <q-input filled v-model="newConfig.name" :label="$t('name')" />
+            <q-input filled v-model="newBuild.name" :label="$t('name')" />
           </q-td>
 
           <q-td key="Value">
-            <q-input filled v-model="newConfig.value" :label="$t('value')" />
+            <q-input filled v-model="newBuild.value" :label="$t('value')" />
           </q-td>
           <q-td key="Action">
-            <q-btn @click="saveConfig">Save</q-btn>
+            <q-btn @click="saveBuild">Save</q-btn>
           </q-td>
         </q-tr>
       </template>
 
   </q-table>
+
   </div>
 </template>
 
@@ -100,12 +145,15 @@ export default {
         { name: "Action", label: this.$t("actions"), field: "value", align: "left" }
       ],
       newConfig: { name: "BALENA_", value: "" },
-      newEnv: { name: "", value: "" }
+      newEnv: { name: "", value: "" },
+      newBuild: { name: "", value: "" }
     }
   },
   methods: {
+
     async saveConfig() {
       await this.$store.state.main.sdk.models.application.configVar.set(this.$route.params.id, this.newConfig.name, this.newConfig.value)
+      this.newConfig = { name: "BALENA_", value: "" }
       this.reload()
     },
     async deleteConfig(props) {
@@ -116,8 +164,10 @@ export default {
       await this.$store.state.main.sdk.models.application.configVar.set(this.$route.params.id, props.row.name, props.row.value)
       this.reload()
     },
+
     async saveEnv() {
       await this.$store.state.main.sdk.models.application.envVar.set(this.$route.params.id, this.newEnv.name, this.newEnv.value)
+      this.newEnv = { name: "", value: "" }
       this.reload()
     },
     async deleteEnv(props) {
@@ -128,16 +178,35 @@ export default {
       await this.$store.state.main.sdk.models.application.envVar.set(this.$route.params.id, props.row.name, props.row.value)
       this.reload()
     },
+
+    async saveBuild() {
+      await this.$store.state.main.sdk.models.application.buildVar.set(this.$route.params.id, this.newBuild.name, this.newBuild.value)
+      this.newBuild = { name: "", value: "" }
+      this.reload()
+    },
+    async deleteBuild(props) {
+      await this.$store.state.main.sdk.models.application.buildVar.remove(this.$route.params.id, props.row.name)
+      this.reload()
+    },
+    async updateBuild(props) {
+      await this.$store.state.main.sdk.models.application.buildVar.set(this.$route.params.id, props.row.name, props.row.value)
+      this.reload()
+    },
+
     async reload() {
       this.$emit("reload")
     }
   },
   props: {
-    currentEnvs: {
+    appConfigVars: {
       type: Array,
       required: true
     },
-    appConfigVars: {
+    appEnvVars: {
+      type: Array,
+      required: true
+    },
+    appBuildVars: {
       type: Array,
       required: true
     },

@@ -25,8 +25,8 @@ https://play.google.com/store/apps/details?id=eu.razniewski.openbalena.dashboard
 * Restart application on device
 * Expose port 80 of the device on dynamic DNS http://xip.io  (check https://github.com/Razikus/open-balena-tunneler)
 * Expose ssh of the device on dynamic DNS http://xip.io with webssh client (check https://github.com/Razikus/open-balena-tunneler)
-* Change and check environment variables of applications
-* Change device environment variable
+* Change and check variables of applications
+* Change nd check variables of devices
 
 # Features plan list
 * Add applications
@@ -39,6 +39,9 @@ Feel free to add the features, and request one.
 
 
 # Developing
+## Notes
+The project uses [Quasar](https://quasar.dev/) which uses Webpack4, so it requires Node.js 14 LTS (as explained [here](https://quasar.dev/quasar-cli/installation) ).
+If you use a self-signed certificate for the open-balena server, you need to allow it for your browser or system wide.
 
 ## Install the dependencies
 ```bash
@@ -59,4 +62,3 @@ npm run lint
 ```bash
 quasar build
 ```
-

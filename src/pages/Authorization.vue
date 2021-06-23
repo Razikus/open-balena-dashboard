@@ -6,7 +6,7 @@
             <q-form class="q-gutter-md">
               <q-input square filled clearable v-model="email" type="email" :label="$t('email')" />
               <q-input square filled clearable v-model="password" type="password" :label="$t('password')" />
-              <q-input square filled clearable v-model="link" type="text" :label="$t('link')" />
+              <q-input square filled clearable v-model="link" type="text" :label="$t('link (https://api.yourdomain)')" />
               <q-input square filled clearable v-model="tunneler" type="text" :hint="$t('tunnelerHint')" :label="$t('tunneler')" />
               <q-input square filled clearable v-model="letsencryptdomain" type="text" :hint="$t('letsEncryptSuffixHint')" :label="$t('letsEncryptSuffix')" />
               <q-checkbox v-model="rememberMe" :label="$t('rememberMe')" />
@@ -31,29 +31,39 @@ export default {
       password: "",
       link: "",
       tunneler: "",
-      rememberMe: false,
-      letsencryptdomain: ""
+      letsencryptdomain: "",
+      rememberMe: false // boolean for checkbox, string for localStorage
     }
   },
   mounted() {
-    if (window.localStorage && window.localStorage.rememberMe) {
-      this.rememberMe = (window.localStorage.rememberMe === "true")
-    }
-    if (window.localStorage && window.localStorage.lastOpenBalenaUrl && this.rememberMe) {
-      this.link = window.localStorage.lastOpenBalenaUrl
-    }
-    if (window.localStorage && window.localStorage.lastTunnelerUrl && this.rememberMe) {
-      this.tunneler = window.localStorage.lastTunnelerUrl
-    }
-    if (window.localStorage && window.localStorage.lastSSLSuffix && this.rememberMe) {
-      this.letsencryptdomain = window.localStorage.lastSSLSuffix
+    // boolean for checkbox, string for localStorage
+    if (window.localStorage && window.localStorage.rememberMe === "true") {
+      this.rememberMe = true
+
+      // copy the data from localStorage
+      if (window.localStorage.lastEmail) {
+        this.email = window.localStorage.lastEmail
+      }
+      if (window.localStorage.lastOpenBalenaUrl) {
+        this.link = window.localStorage.lastOpenBalenaUrl
+      }
+      if (window.localStorage.lastTunnelerUrl) {
+        this.tunneler = window.localStorage.lastTunnelerUrl
+      }
+      if (window.localStorage.lastSSLSuffix) {
+        this.letsencryptdomain = window.localStorage.lastSSLSuffix
+      }
+    } else { // doesn't copy the data
+      this.rememberMe = false
     }
   },
+
   methods: {
     async tryToLogin() {
       const balena = getSdk({
           apiUrl: this.link
       })
+
       balena.interceptors.push({
           responseError: (error) => {
               this.$q.notify({
@@ -64,6 +74,7 @@ export default {
           }
         }
       )
+      // why 2 times ?
       balena.interceptors.push({
           requestError: (error) => {
               this.$q.notify({
@@ -74,29 +85,35 @@ export default {
           }
         }
       )
-      
+
       const token = await balena.auth.authenticate({ email: this.email, password: this.password })
-      await balena.auth.loginWithToken(token)
+      await balena.auth.loginWithToken(token) // sync login
       this.$store.commit("main/setToken", token)
       this.$store.commit("main/setSDK", balena)
       this.$store.commit("main/setTunnelerUrl", this.tunneler)
       this.$store.commit("main/setSSLSuffix", this.letsencryptdomain)
       this.$router.push("home")
 
+      // write data to local storage or delete it
+      // only string stored in localStorage (conversion)
       if (window.localStorage) {
-        if (this.rememberMe) {
+        if (this.rememberMe === true) {
+          window.localStorage.rememberMe = this.rememberMe
+          window.localStorage.lastEmail = this.email
           window.localStorage.lastOpenBalenaUrl = this.link
+
           if (this.tunneler) {
             window.localStorage.lastTunnelerUrl = this.tunneler
           }
           if (this.letsencryptdomain) {
             window.localStorage.lastSSLSuffix = this.letsencryptdomain
           }
-          window.localStorage.rememberMe = this.rememberMe
         } else {
-          delete window.localStorage.lastTunnelerUrl
-          delete window.localStorage.lastOpenBalenaUrl
           delete window.localStorage.rememberMe
+          delete window.localStorage.lastEmail
+          delete window.localStorage.lastOpenBalenaUrl
+          delete window.localStorage.lastTunnelerUrl
+          delete window.localStorage.lastSSLSuffix
         }
       }
     }

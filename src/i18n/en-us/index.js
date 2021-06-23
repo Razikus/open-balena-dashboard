@@ -4,6 +4,7 @@
 export default {
   failed: 'Action failed',
   success: 'Action was successful',
+
   home: "Home",
   links: "Essential Links",
   logs: "Logs terminal",
@@ -14,9 +15,11 @@ export default {
   note: "Note",
   overall: "Overall status / progress",
   notloaded: "Not loaded",
+
   link: "Open Balena link",
   password: "Password",
   email: "E-mail",
+
   reboot: "Reboot",
   restart: "Restart",
   nonote: "No notes",
@@ -45,7 +48,19 @@ export default {
   letsEncryptSuffix: "SSL suffix for auto domain exposer",
   letsEncryptSuffixHint: "Example '.s1.blabla.com' - will expose DEVICEUUID.s1.blabla.com as SSL",
   mac_address: "Mac addresses",
+  os_version: "OS version",
+  cpu_usage: "CPU usage",
+  memory_usage: "Memory usage",
+  is_web_accessible: "Accessible from web",
+  local_mode: "Local Mode",
+  supervisor_version: "Supervisor Version",
   editDeviceEnv: "Edit envs",
-  DeviceEnvVars: "Device env vars (higher priority than application envs)",
-  delete: "Delete"
+  DeviceEnvVars: "Device env vars",
+  exportState: "Export State",
+  organization: "Organization",
+  delete: "Delete",
+  versioncaption: "Version history",
+
+  switch_application: "Switch app",
+  switch_app_name: "Select the destination application"
 }

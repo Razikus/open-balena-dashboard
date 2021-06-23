@@ -23,28 +23,31 @@
       bordered
       content-class="bg-grey-1"
     >
-      <q-list v-if="$store.state.main.loggedIn"> 
+      <q-list v-if="$store.state.main.loggedIn">
         <q-item-label
           header
           class="text-grey-8"
         >
           {{ $t('links') }}
         </q-item-label>
-        <EssentialLink 
+        <EssentialLink
           v-for="link in essentialLinks"
           :key="link.title"
           v-bind="link"
         />
         <q-separator/>
       </q-list>
-      <q-list v-if="$store.state.main.selectedApplication"> 
+
+      <q-list v-if="$store.state.main.selectedApplication">
         <q-item-label
           header
           class="text-grey-8"
         >
-          {{ $t('selectedApplication') }} {{ $store.state.main.selectedApplication }}
+          {{ $t('selected application: ') }}
+          <span class= "text-bold">{{ $store.state.main.selectedApplication }}</span>
         </q-item-label>
-        <EssentialLink 
+
+        <EssentialLink
           v-for="link in appLinks"
           :key="link.title"
           v-bind="link"
@@ -84,6 +87,15 @@ export default {
           caption: 'devicescaption',
           icon: 'cloud',
           link: 'application',
+          param: () => {
+            return { id: this.$store.state.main.selectedApplication }
+          }
+        },
+        {
+          title: 'Versions',
+          caption: 'versioncaption',
+          icon: 'update',
+          link: 'history',
           param: () => {
             return { id: this.$store.state.main.selectedApplication }
           }
