@@ -11,13 +11,13 @@
         </tr>
       </thead>
 
-      <tbody>
-        <tr v-for="app in applicationList" :key="app.id">
-          <td>{{app.id}}</td>
-          <td>{{app.commit}}</td>
-          <td>{{app.created_at}}</td>
-          <td>{{app.status}}</td>
-          <td>{{app.size}}</td>
+      <tbody v-if=" loading=== false">
+        <tr v-for="image in imageList" :key="image.id" >
+          <td>{{image.id}}</td>
+          <td>{{image.commit}}</td>
+          <td>{{image.created_at}}</td>
+          <td>{{image.status}}</td>
+          <td>{{image.size}} MB</td>
         </tr>
       </tbody>
     </q-markup-table>
@@ -32,34 +32,41 @@ export default {
 
   data() {
     return {
-      applicationList: {},
-      slug: ''
+      imageList: {},
+      slug: '',
+      loading: true
     }
   },
 
   mounted() {
     this.slug = this.$route.params.id
+
     this.fetchData()
   },
 
   methods: {
     async fetchData() {
-      this.applicationList = await this.$store.state.main.sdk.models.release.getAllByApplication(this.slug)
+      this.loading = true
+      this.imageList = await this.$store.state.main.sdk.models.release.getAllByApplication(this.slug)
 
-      const appIDs = this.applicationList.map(elem => {
+      const appIDs = this.imageList.map(elem => {
         return elem.id
       })
 
 // trying to pull image size from the registry
-      await appIDs.forEach(async (elem, index) => {
-        const temp = await this.$store.state.main.sdk.models.image.get(elem)
 
-        if (temp === undefined) {
-          this.applicationList[index].size = null
-        } else {
-          this.applicationList[index].size = temp.image_size
-        }
-      })
+      const details = await Promise.all(
+        appIDs.map(async (elem) => {
+          return await this.$store.state.main.sdk.models.image.get(elem)
+        })
+      )
+
+      for (let i = 0; i < details.length; i++) {
+        this.imageList[i].size = Math.trunc(details[i].image_size / (1000000)) // 1M
+      }
+      console.log(this.imageList)
+
+      this.loading = false
     }
   }
 }
