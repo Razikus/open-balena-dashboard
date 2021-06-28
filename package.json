@@ -10,12 +10,12 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "@quasar/extras": "^1.9.12",
+    "@quasar/extras": "^1.10.6",
     "axios": "^0.21.1",
-    "balena-sdk": "^15.20.0",
+    "balena-sdk": "15.26.x",
     "core-js": "^3.6.5",
     "getopts": "^2.3.0",
-    "quasar": "^1.0.0",
+    "quasar": "^1.15.19",
     "tableify": "^1.1.0",
     "vue-i18n": "^8.0.0"
   },

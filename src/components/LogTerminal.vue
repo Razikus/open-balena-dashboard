@@ -1,15 +1,13 @@
 <template>
-  <q-dialog v-on:keydown.ctrl.90.capture.prevent.stop="hideLog"  full-height full-width v-model="dialog" persistent>
     <q-card class="bg-black">
       <q-bar>
+        Logs
         <q-space/>
-        <q-btn dense flat color="white" icon="close" @click="hideLog" v-close-popup>
-          <q-tooltip>Close</q-tooltip>
-        </q-btn>
       </q-bar>
+      <q-scroll-area style="height: 470px;">
       <shell :banner="banner" :shell_input="send_to_terminal" @shell_output="prompt"></shell>
+      </q-scroll-area>
     </q-card>
-  </q-dialog>
 </template>
 <script>
 
@@ -32,7 +30,6 @@ export default {
   },
   mounted() {
     this.terminalUtil = new TerminalCommandsUtil(this.uuid, this.$store.state.main.sdk)
-    this.getServicesForDevice(this.uuid)
   },
   methods: {
     detach() {
@@ -63,7 +60,6 @@ export default {
       })
       this.$store.state.main.sdk.logs.subscribe(uuid).then(logs => {
         logs.on("line", (message) => {
-          console.log(message)
           this.terminalUtil.formatMessageAsPromise(message).then(res => {
             this.send_to_terminal += `<br>${res}`
           })
