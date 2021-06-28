@@ -10,7 +10,9 @@ export function setSDK(state, sdk) {
 export function selectApplication(state, app) {
     state.selectedApplication = app
 }
-
+export function selectDevice(state, device) {
+  state.selectedDevice = device
+}
 export function setTunnelerUrl(state, url) {
     state.tunnelerUrl = url
 }

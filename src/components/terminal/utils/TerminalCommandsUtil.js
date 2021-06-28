@@ -24,7 +24,6 @@ class TerminalCommandsUtil {
 
   processCommand(command) {
     const opts = getopts(command.split(" "))
-    console.log(opts)
     if (command.includes("list")) {
       if (opts.a) {
         return this.getFullServicesForDevice()
@@ -69,7 +68,11 @@ class TerminalCommandsUtil {
       const servicesObj = {}
       Object.keys(dev.current_services).forEach(key => {
         const service = dev.current_services[key].filter(s => s.status.includes("Running"))[0]
-        servicesObj[service.service_id] = key
+        try {
+          servicesObj[service.service_id] = key
+        } catch (e) {
+          servicesObj.SYSTEM = key
+        }
       })
       return servicesObj
     })
@@ -80,13 +83,13 @@ class TerminalCommandsUtil {
   }
 
   formatSingleMessage(services, message) {
-      if (message.isSystem) {
-        return `<b style="color: white;">[SYSTEM]</b> [${this.formatDate(message.createdAt)}] ${message.message}`
-      }
-      if (message.isStdErr) {
-        return `<b style="color: red;">[ERROR]</b> <span style="color: red"> [${this.formatDate(message.createdAt)}] ${message.message}</span>`
-      }
-      return `<b style="color: ${this.colors[Object.keys(services).indexOf("" + message.serviceId)]};">[${services[message.serviceId]}]</b> [${this.formatDate(message.createdAt)}] ${message.message}`
+    if (message.isSystem) {
+      return `<b style="color: blue;">[SYSTEM]</b> [${this.formatDate(message.createdAt)}] ${message.message}`
+    }
+    if (message.isStdErr) {
+      return `<b style="color: red;">[ERROR]</b> <span style="color: red"> [${this.formatDate(message.createdAt)}] ${message.message}</span>`
+    }
+    return `<b style="color: ${this.colors[Object.keys(services).indexOf("" + message.serviceId)]};">[${services[message.serviceId]}]</b> [${this.formatDate(message.createdAt)}] ${message.message}`
   }
 
   formatMessageAsPromise(message) {
@@ -99,7 +102,6 @@ class TerminalCommandsUtil {
     return this.sdk.logs.history(this.uuid).then(messages => {
       return this.getServicesMap().then(services => {
         return messages.filter(message => {
-          console.log(services)
           return !message.isSystem && !message.isStdErr && services[message.serviceId] === (serviceName)
         }).map(message => {
           return `<b style="color: ${this.colors[Object.keys(services).indexOf("" + message.serviceId)]};">[${services[message.serviceId]}]</b> [${this.formatDate(message.createdAt)}] ${message.message}`
@@ -127,14 +129,12 @@ class TerminalCommandsUtil {
 
   getServicesForDevice() {
     return this.sdk.models.device.getWithServiceDetails(this.uuid).then(dev => {
-      console.log(dev)
       return Object.keys(dev.current_services).join(`<br>`)
     })
   }
 
   getFullServicesForDevice() {
     return this.sdk.models.device.getWithServiceDetails(this.uuid).then(dev => {
-      console.log(dev)
       return tableify(Object.keys(dev.current_services).map(key => {
         const service = dev.current_services[key].filter(s => s.status.includes("Running"))[0]
         return {

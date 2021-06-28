@@ -4,6 +4,7 @@ export default function () {
     token: "",
     sdk: undefined,
     selectedApplication: undefined,
+    selectedDevice: undefined,
     tunnelerUrl: undefined,
     SSLSuffix: undefined
   }

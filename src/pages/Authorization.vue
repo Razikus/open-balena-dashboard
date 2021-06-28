@@ -4,6 +4,10 @@
         <q-card square bordered class="q-pa-lg col-12 shadow-1">
           <q-card-section>
             <q-form class="q-gutter-md">
+              <div class="row justify-center">
+                <q-img class="relative-position flex-center" width="50%" src="/openbalena_logo.png"/>
+              </div>
+
               <q-input square filled clearable v-model="email" type="email" :label="$t('email')" />
               <q-input square filled clearable v-model="password" type="password" :label="$t('password')" />
               <q-input square filled clearable v-model="link" type="text" :label="$t('link')" />
@@ -13,7 +17,7 @@
             </q-form>
           </q-card-section>
           <q-card-actions class="q-px-md">
-            <q-btn @click="tryToLogin" unelevated color="black" size="lg" class="full-width" label="Login" />
+            <q-btn @click="tryToLogin" unelevated color="black" size="lg" class="full-width" :label="$t('login')" />
           </q-card-actions>
         </q-card>
       </div>
@@ -36,7 +40,7 @@ export default {
     }
   },
   mounted() {
-    if (window.localStorage && window.localStorage.rememberMe) {
+    if (window.localStorage.sessionToken && window.localStorage.rememberMe) {
       this.rememberMe = (window.localStorage.rememberMe === "true")
     }
     if (window.localStorage && window.localStorage.lastOpenBalenaUrl && this.rememberMe) {
@@ -48,41 +52,44 @@ export default {
     if (window.localStorage && window.localStorage.lastSSLSuffix && this.rememberMe) {
       this.letsencryptdomain = window.localStorage.lastSSLSuffix
     }
+    this.tryToLogin()
   },
   methods: {
     async tryToLogin() {
       const balena = getSdk({
           apiUrl: this.link
       })
-      balena.interceptors.push({
-          responseError: (error) => {
+      let token
+      if (window.localStorage.rememberMe && window.localStorage.sessionToken) {
+        token = window.localStorage.sessionToken
+      } else {
+        token = await balena.auth.authenticate({ email: this.email, password: this.password })
+        balena.interceptors.push({
+            responseError: (error) => {
               this.$q.notify({
                 color: "negative",
                 message: error.toString()
               })
               throw error
+            }
           }
-        }
-      )
-      balena.interceptors.push({
-          requestError: (error) => {
+        )
+        balena.interceptors.push({
+            requestError: (error) => {
               this.$q.notify({
                 color: "negative",
                 message: error.toString()
               })
               throw error
+            }
           }
-        }
-      )
-      
-      const token = await balena.auth.authenticate({ email: this.email, password: this.password })
+        )
+      }
       await balena.auth.loginWithToken(token)
       this.$store.commit("main/setToken", token)
       this.$store.commit("main/setSDK", balena)
       this.$store.commit("main/setTunnelerUrl", this.tunneler)
       this.$store.commit("main/setSSLSuffix", this.letsencryptdomain)
-      this.$router.push("home")
-
       if (window.localStorage) {
         if (this.rememberMe) {
           window.localStorage.lastOpenBalenaUrl = this.link
@@ -93,12 +100,15 @@ export default {
             window.localStorage.lastSSLSuffix = this.letsencryptdomain
           }
           window.localStorage.rememberMe = this.rememberMe
+          window.localStorage.sessionToken = token
         } else {
           delete window.localStorage.lastTunnelerUrl
           delete window.localStorage.lastOpenBalenaUrl
           delete window.localStorage.rememberMe
+          delete window.localStorage.sessionToken
         }
       }
+      this.$router.push("home")
     }
   }
 }
